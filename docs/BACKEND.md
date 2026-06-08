@@ -5,12 +5,13 @@ A small [Hono](https://hono.dev) HTTP API that paraphrases text with **Llama 3.3
 - **Runtime:** Node.js (`@hono/node-server`)
 - **AI:** `groq-sdk` → `llama-3.3-70b-versatile`
 - **Data/Auth:** `@supabase/supabase-js` with the **service-role** key (bypasses RLS; the server is the trusted boundary)
-- **Entry point:** [`src/index.js`](src/index.js)
+- **Entry point:** [`backend/src/index.js`](../backend/src/index.js)
 
 ## Running locally
 
 ```bash
-cp .env.example .env   # fill in credentials
+cd backend
+# create a .env file with the variables below
 npm install
 npm run dev            # http://localhost:3000
 ```
@@ -125,4 +126,4 @@ Deletes one rewrite **owned by the caller**. Ownership is verified before deleti
 
 ## Deployment (Render)
 
-Configured by [`../render.yaml`](../render.yaml): `rootDir: backend`, `buildCommand: npm install`, `startCommand: node src/index.js`, health check at `/api/health`. Set `GROQ_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `ALLOWED_ORIGINS` (your Vercel URL) in the Render dashboard. The server handles `SIGTERM`/`SIGINT` for graceful shutdown.
+Configured by [`render.yaml`](../render.yaml): `rootDir: backend`, `buildCommand: npm install`, `startCommand: node src/index.js`, health check at `/api/health`. Set `GROQ_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `ALLOWED_ORIGINS` (your Vercel URL) in the Render dashboard. The server handles `SIGTERM`/`SIGINT` for graceful shutdown.

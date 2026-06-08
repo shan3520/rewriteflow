@@ -5,7 +5,8 @@ The React single-page app for RewriteFlow: auth, the rewrite editor with live st
 ## Running locally
 
 ```bash
-cp .env.example .env   # fill in credentials
+cd frontend
+# create a .env file with the variables below
 npm install
 npm run dev            # http://localhost:5173
 ```
@@ -71,7 +72,7 @@ Routes are defined in `App.jsx` and each page is **lazy-loaded** (code-split) so
 - **`getHistory(session)`** — GET `/api/history`.
 - **`deleteHistoryItem(session, id)`** — DELETE `/api/history/:id`.
 
-Non-OK responses are converted to friendly, status-aware error messages (`describeError`). See [`../backend/README.md`](../backend/README.md) for the full streaming protocol and event shapes.
+Non-OK responses are converted to friendly, status-aware error messages (`describeError`). See [`BACKEND.md`](BACKEND.md) for the full streaming protocol and event shapes.
 
 ## Refinement modes
 
@@ -79,4 +80,4 @@ The mode dropdown shows labels (Standard, Professional, Extensive, Clarified, Ex
 
 ## Deployment (Vercel)
 
-Configured by [`vercel.json`](vercel.json): Vite framework preset, build to `dist/`, SPA rewrite (all routes → `index.html`), long-lived caching for hashed assets, and security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, etc.). Set the Vercel project **root directory** to `frontend` and add the `VITE_*` env vars (point `VITE_API_BASE_URL` at your Render backend).
+Configured by [`frontend/vercel.json`](../frontend/vercel.json): Vite framework preset, build to `dist/`, SPA rewrite (all routes → `index.html`), long-lived caching for hashed assets, and security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, etc.). Set the Vercel project **root directory** to `frontend` and add the `VITE_*` env vars (point `VITE_API_BASE_URL` at your Render backend).

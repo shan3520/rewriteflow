@@ -27,15 +27,17 @@ Rewrite text paragraph-by-paragraph using **Llama 3.3 70B** via Groq, with real-
 rewriteflow/
 ├── README.md            ← you are here
 ├── render.yaml          Render deploy config (backend)
-├── docs/
+├── docs/                ← all documentation lives here
+│   ├── BACKEND.md       Backend API reference + streaming protocol
+│   ├── FRONTEND.md      Frontend structure, routing, scripts
+│   ├── ARCHITECTURE.md  How the pieces fit: request & data flow
 │   ├── PRODUCT.md       Product requirements (audience, value, principles)
-│   ├── DESIGN.md        Visual + interaction design system
-│   └── ARCHITECTURE.md  How the pieces fit: request & data flow
+│   └── DESIGN.md        Visual + interaction design system
 ├── db/
 │   └── schema.sql       Supabase schema: tables, triggers, RLS policies
-├── backend/             Hono API — see backend/README.md
+├── backend/             Hono API (code only)
 │   └── src/index.js
-└── frontend/            React + Vite app — see frontend/README.md
+└── frontend/            React + Vite app (code only)
     └── src/
 ```
 
@@ -62,13 +64,13 @@ cd rewriteflow
 
 # 3. Backend
 cd backend
-cp .env.example .env    # fill in credentials
+# create a .env file with the variables below
 npm install
 npm run dev             # http://localhost:3000
 
 # 4. Frontend (new terminal)
 cd frontend
-cp .env.example .env    # fill in credentials
+# create a .env file with the variables below
 npm install
 npm run dev             # http://localhost:5173
 ```
@@ -97,8 +99,8 @@ Run `db/schema.sql` in your Supabase SQL Editor to create the `users` and `rewri
 
 ## Documentation
 
-- **[backend/README.md](backend/README.md)** — API reference, the ndjson streaming protocol, retry/rate-limit behavior
-- **[frontend/README.md](frontend/README.md)** — app structure, routing, scripts, state
+- **[docs/BACKEND.md](docs/BACKEND.md)** — API reference, the ndjson streaming protocol, retry/rate-limit behavior
+- **[docs/FRONTEND.md](docs/FRONTEND.md)** — app structure, routing, scripts, state
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — end-to-end request & data flow, auth model
 - **[docs/PRODUCT.md](docs/PRODUCT.md)** — product requirements & principles
 - **[docs/DESIGN.md](docs/DESIGN.md)** — design system

@@ -66,7 +66,7 @@ Stitch paragraphs ─► save row to `rewrites` (best-effort)
 emit  {type:"result", rewritten_text, word counts}  ─► stream closes
 ```
 
-The response is **ndjson** (`application/x-ndjson`, chunked). The frontend reads the stream incrementally so the user sees each paragraph and a live progress count as they complete, rather than waiting for the whole job. A client disconnect aborts processing immediately. Full event shapes are documented in [`../backend/README.md`](../backend/README.md).
+The response is **ndjson** (`application/x-ndjson`, chunked). The frontend reads the stream incrementally so the user sees each paragraph and a live progress count as they complete, rather than waiting for the whole job. A client disconnect aborts processing immediately. Full event shapes are documented in [`BACKEND.md`](BACKEND.md).
 
 ## Data model
 
