@@ -26,10 +26,14 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Close mobile menu on route change
-  useEffect(() => {
+  // Close the mobile menu when the route changes (including back/forward), without
+  // an effect: adjust state during render off the previous pathname. This is the
+  // React-recommended alternative to setState-in-effect.
+  const [menuPath, setMenuPath] = useState(location.pathname)
+  if (menuPath !== location.pathname) {
+    setMenuPath(location.pathname)
     setMobileOpen(false)
-  }, [location.pathname])
+  }
 
   async function handleSignOut() {
     setMobileOpen(false)
