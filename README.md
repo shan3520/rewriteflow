@@ -6,9 +6,9 @@ Rewrite text paragraph-by-paragraph using **Llama 3.3 70B** via Groq, with real-
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 19 · Vite 5 · Tailwind CSS 3 |
+| Frontend | React 19 · Vite 5 · Tailwind CSS 3 · Framer Motion |
 | Backend | Node.js · Hono |
-| AI | Groq SDK (llama-3.3-70b-versatile) |
+| AI | Groq SDK (`llama-3.3-70b-versatile`) |
 | Database | Supabase (PostgreSQL + Auth + RLS) |
 | Hosting | Vercel (frontend) · Render (backend) |
 
@@ -21,20 +21,52 @@ Rewrite text paragraph-by-paragraph using **Llama 3.3 70B** via Groq, with real-
 - 🌙 **Dark mode** — system-aware with manual toggle
 - 📱 **Responsive** — mobile-first with glassmorphism UI
 
+## Project Structure
+
+```
+rewriteflow/
+├── README.md            ← you are here
+├── render.yaml          Render deploy config (backend)
+├── docs/
+│   ├── PRODUCT.md       Product requirements (audience, value, principles)
+│   ├── DESIGN.md        Visual + interaction design system
+│   └── ARCHITECTURE.md  How the pieces fit: request & data flow
+├── db/
+│   └── schema.sql       Supabase schema: tables, triggers, RLS policies
+├── backend/             Hono API — see backend/README.md
+│   └── src/index.js
+└── frontend/            React + Vite app — see frontend/README.md
+    └── src/
+```
+
+## Refinement Modes
+
+The UI shows friendly **labels**, but the API and database use internal **values**. When calling the API directly, send the value (left column).
+
+| API value | UI label | Description |
+|-----------|----------|-------------|
+| `standard` | Standard | Preserves the original meaning with fresh wording |
+| `academic` | Professional | Formal scholarly tone and polished structure |
+| `aggressive` | Extensive | Maximum restructuring for originality |
+| `simplified` | Clarified | Plain English for maximum readability |
+| `creative` | Expressive | A more literary, engaging rewrite |
+
 ## Quick Start
 
 ```bash
 # 1. Clone
-git clone <your-repo-url>
-cd bud-project1
+git clone https://github.com/shan3520/rewriteflow.git
+cd rewriteflow
 
-# 2. Backend
+# 2. Database — run db/schema.sql in your Supabase SQL Editor
+
+# 3. Backend
 cd backend
 cp .env.example .env    # fill in credentials
 npm install
 npm run dev             # http://localhost:3000
 
-# 3. Frontend (new terminal)
+# 4. Frontend (new terminal)
 cd frontend
 cp .env.example .env    # fill in credentials
 npm install
@@ -48,7 +80,7 @@ npm run dev             # http://localhost:5173
 |----------|-------------|
 | `GROQ_API_KEY` | Groq API key ([console.groq.com](https://console.groq.com)) |
 | `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role secret |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role secret (bypasses RLS) |
 | `PORT` | Server port (default: 3000) |
 | `ALLOWED_ORIGINS` | Comma-separated frontend URLs for CORS |
 
@@ -61,7 +93,15 @@ npm run dev             # http://localhost:5173
 
 ## Database Setup
 
-Run `db/schema.sql` in your Supabase SQL Editor to create tables, triggers, and RLS policies.
+Run `db/schema.sql` in your Supabase SQL Editor to create the `users` and `rewrites` tables, the new-user trigger, and the RLS policies. See [`db/schema.sql`](db/schema.sql) for details.
+
+## Documentation
+
+- **[backend/README.md](backend/README.md)** — API reference, the ndjson streaming protocol, retry/rate-limit behavior
+- **[frontend/README.md](frontend/README.md)** — app structure, routing, scripts, state
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — end-to-end request & data flow, auth model
+- **[docs/PRODUCT.md](docs/PRODUCT.md)** — product requirements & principles
+- **[docs/DESIGN.md](docs/DESIGN.md)** — design system
 
 ## Deployment
 
