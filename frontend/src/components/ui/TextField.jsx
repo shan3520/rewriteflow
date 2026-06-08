@@ -4,10 +4,11 @@ import { cn } from '../../lib/cn.js'
 // Labeled form field for the auth surfaces: a <label> bound to a `.field` input,
 // with optional inline error wiring (aria-invalid + aria-describedby + red border
 // + message) and an optional trailing `endAdornment` (e.g. a show/hide button,
-// which gets the pr-11 clearance and a relative wrapper). Background and text are
-// the tinted auth-input treatment; everything else (type, value, onChange,
-// autoComplete, required, minLength, ...) forwards to the <input>. `children`
-// render below the field, e.g. a password-strength meter.
+// which gets the pr-11 clearance and a relative wrapper). The `.field` class owns
+// background, border, and text color; only the error state overrides the border to
+// red. Everything else (type, value, onChange, autoComplete, required, minLength,
+// ...) forwards to the <input>. `children` render below the field, e.g. a
+// password-strength meter.
 //
 // Props: label, error?, endAdornment?, id?, children?, ...inputProps
 export default function TextField({ label, error, endAdornment, id, className, children, ...inputProps }) {
@@ -21,9 +22,9 @@ export default function TextField({ label, error, endAdornment, id, className, c
       aria-invalid={error ? true : undefined}
       aria-describedby={error ? errorId : undefined}
       className={cn(
-        'field px-4 py-3 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white',
+        'field px-4 py-3',
         endAdornment && 'pr-11',
-        error ? 'border-red-300 dark:border-red-700/50' : 'border-gray-200 dark:border-gray-700/50',
+        error && 'border-red-300 dark:border-red-700/50',
         className,
       )}
       {...inputProps}

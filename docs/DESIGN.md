@@ -1,51 +1,54 @@
 ---
-name: RewriteAI
-description: AI-powered plagiarism remover — paste text, get a faithful rewrite
+name: RewriteFlow
+description: AI text refiner — paste a draft, get a faithful rewrite, paragraph by paragraph
 colors:
-  editors-green: "#10b981"
-  editors-green-fill: "#047857"
-  editors-green-fill-hover: "#065f46"
-  editors-green-light: "#34d399"
-  slate-wash-50: "#f8fbf9"
-  slate-wash-100: "#f1f5f3"
-  slate-wash-200: "#e4e8e6"
-  slate-wash-300: "#d1d6d3"
-  slate-wash-400: "#9ea4a1"
-  slate-wash-500: "#6e7370"
-  slate-wash-600: "#505653"
-  slate-wash-700: "#3d423f"
-  slate-wash-800: "#262927"
-  slate-wash-900: "#161918"
-  slate-wash-950: "#060807"
+  oxford-blue: "#002147"
+  oxford-blue-hover: "#003366"
+  oxford-soft: "#7da7d9"
+  oxford-deep: "#0b1320"
+  paper: "#fdfbf7"
+  ink-black: "#1a1a1a"
+  mat: "#f3efe6"
+  dark-bg: "#16181c"
+  dark-paper: "#1e2127"
+  dark-paper-2: "#23272f"
+  dark-border: "#313742"
+  gray-50: "rgb(253 251 247)"
+  gray-100: "rgb(245 243 238)"
+  gray-200: "rgb(232 230 223)"
+  gray-300: "rgb(214 212 204)"
+  gray-400: "rgb(168 165 156)"
+  gray-500: "rgb(122 119 108)"
+  gray-600: "rgb(89 86 78)"
+  gray-700: "rgb(64 61 54)"
+  gray-800: "rgb(38 37 34)"
+  gray-900: "rgb(26 26 26)"
+  gray-950: "rgb(10 10 10)"
 typography:
-  heading:
-    fontFamily: "DM Sans, system-ui, -apple-system, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 700
-    lineHeight: 1.2
-    letterSpacing: "normal"
+  display:
+    fontFamily: "EB Garamond, Georgia, 'Times New Roman', serif"
+    fontWeight: 600
+    lineHeight: 1.08
+    letterSpacing: "-0.015em"
   body:
-    fontFamily: "DM Sans, system-ui, -apple-system, sans-serif"
-    fontSize: "0.875rem"
+    fontFamily: "Crimson Text, Georgia, 'Times New Roman', serif"
+    fontSize: "1.0625rem"
     fontWeight: 400
-    lineHeight: 1.625
+    lineHeight: 1.6
     letterSpacing: "normal"
   label:
-    fontFamily: "DM Sans, system-ui, -apple-system, sans-serif"
-    fontSize: "0.75rem"
-    fontWeight: 600
+    fontFamily: "IBM Plex Mono, ui-monospace, Menlo, monospace"
+    fontSize: "0.6875rem"
+    fontWeight: 500
     lineHeight: 1.5
-    letterSpacing: "0.025em"
-  caption:
-    fontFamily: "DM Sans, system-ui, -apple-system, sans-serif"
-    fontSize: "0.75rem"
-    fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: "normal"
+    letterSpacing: "0.14em"
+    textTransform: "uppercase"
 rounded:
-  sm: "8px"
-  md: "12px"
-  lg: "16px"
+  bezel-outer: "12px"
+  bezel-inner: "6px"
+  button: "6px"
+  field: "6px"
+  card: "8px"
   full: "9999px"
 spacing:
   xs: "4px"
@@ -53,212 +56,158 @@ spacing:
   md: "16px"
   lg: "24px"
   xl: "32px"
+  page-top: "7rem"
 components:
   button-primary:
-    backgroundColor: "{colors.editors-green-fill}"
+    backgroundColor: "{colors.oxford-blue}"
     textColor: "#ffffff"
-    rounded: "{rounded.md}"
-    padding: "10px 24px"
-    typography: "{typography.body}"
-  button-primary-hover:
-    backgroundColor: "{colors.editors-green-fill-hover}"
+    typography: "{typography.label}"
+    rounded: "{rounded.button}"
+    padding: "0.85rem 1.75rem"
+    note: "Inverts to outlined (white bg, oxford text) on hover; scale(0.985) on press."
   button-ghost:
     backgroundColor: "transparent"
-    textColor: "{colors.slate-wash-500}"
-    rounded: "{rounded.md}"
-    padding: "6px 14px"
-    typography: "{typography.caption}"
-  card-surface:
+    textColor: "{colors.gray-600}"
+    typography: "{typography.label}"
+    rounded: "{rounded.button}"
+    padding: "0.5rem 0.85rem"
+  bezel:
+    backgroundColor: "{colors.mat}"
+    border: "1px solid {colors.gray-300}"
+    rounded: "{rounded.bezel-outer}"
+    padding: "7px"
+    note: "Outer mat board; frames an inset .bezel-inner surface."
+  bezel-inner:
     backgroundColor: "#ffffff"
-    textColor: "{colors.slate-wash-900}"
-    rounded: "{rounded.lg}"
-    padding: "16px"
-  card-surface-dark:
-    backgroundColor: "{colors.slate-wash-900}"
-    textColor: "#ffffff"
-    rounded: "{rounded.lg}"
-    padding: "16px"
-  input-field:
-    backgroundColor: "{colors.slate-wash-50}"
-    textColor: "{colors.slate-wash-900}"
-    rounded: "{rounded.md}"
-    padding: "12px 16px"
-  chip-active:
-    backgroundColor: "#ecfdf5"
-    textColor: "{colors.editors-green-fill}"
-    rounded: "{rounded.sm}"
-    padding: "6px 12px"
-  chip-inactive:
-    backgroundColor: "transparent"
-    textColor: "{colors.slate-wash-500}"
-    rounded: "{rounded.sm}"
-    padding: "6px 12px"
+    border: "1px solid {colors.gray-200}"
+    rounded: "{rounded.bezel-inner}"
+    note: "Inset surface with a top bevel highlight and an ink-tinted recess."
+  field:
+    backgroundColor: "#ffffff"
+    textColor: "{colors.gray-900}"
+    border: "1px solid {colors.gray-300}"
+    rounded: "{rounded.field}"
+    padding: "0.75rem 1rem"
+    focusRing: "0 0 0 3px rgb(var(--accent-rgb) / 0.16)"
 ---
 # Design System: RewriteFlow
 
 ## 1. Overview
 
-**Creative North Star: "The Writing Workspace"**
+**Creative North Star: "The Archival Desk."**
 
-The Writing Workspace is the disciplined surface where work gets checked, refined, and polished without ceremony. RewriteFlow's interface is a focused environment for writers, professionals, and creators who care about one thing: getting trustworthy, high-quality reworded text back fast. The design exists to disappear. Every surface, color, and animation serves the user's text — nothing else.
+RewriteFlow is the disciplined surface where a draft gets checked, refined, and returned in different words, without ceremony. The interface borrows from the editorial and archival tradition: a matted document on a desk, heritage serif type for reading, and a mono "instrument label" voice for the controls and readouts around the work. The design exists to disappear; the user's text (input and output) is always the largest, most prominent thing on screen.
 
-The system is built on restraint. One font family. One accent hue. Opaque surfaces with real borders. Motion that conveys state, never decoration. The visual language borrows from the editorial tradition: clean document pages, careful precision, and a quiet confidence. It explicitly rejects the gradient-soup, glassmorphic "AI tool" template that signals machine-generated output.
-...
-- **Don't** use emoji as UI elements or decorative icons. The product serves professional users; emoji can undermine trust in a precision tool.
-The density is calibrated for a product-register application: compact but not cramped, with consistent affordances and predictable behavior across every screen. The user's text (input and output) is always the largest, most prominent element on screen. UI chrome stays secondary.
+The system commits to a single identity hue (Oxford Blue), a serif reading face paired against a mono label face on a deliberate contrast axis, opaque surfaces with real borders, and motion that conveys state and nothing else. It explicitly rejects the gradient-soup, glassmorphic "AI tool" template.
 
-**Key Characteristics:**
-- **Precise:** Honest states, tabular numbers, legible progress, predictable affordances
-- **Trustworthy:** One accent used sparingly, no decorative noise, calm feedback
-- **Focused:** Single-task layout, the text is the hero, tool disappears into the task
+**Key characteristics**
+- **Precise:** honest states, tabular numerals, legible progress, predictable affordances.
+- **Trustworthy:** one accent used sparingly, no decorative noise, calm feedback.
+- **Focused:** single-task layout; the text is the hero; the tool gets out of the way.
 
 ## 2. Colors
 
-A restrained, emerald-anchored palette built for trust. One accent hue used at ≤10% of any screen; the rest is a warm-cool tinted neutral scale that reads as professional without falling into sterile corporate gray.
+A restrained palette anchored on one identity hue. Oxford Blue carries every "active / committed / in-progress" signal; everything else is a paper-tinted neutral ramp that reads warm without going sterile-gray.
 
-### Primary
+### Identity
 
-- **Editor's Green** (#10b981): The identity hue. Used for focus rings, active states, progress fills, and the accent chip on the "Rewritten Text" panel label. At 500 saturation it signals attention without shouting. Never used as a background fill under text — that's what the darker fills are for.
-- **Editor's Green Fill** (#047857): The accessible solid fill for primary buttons and strong interactive elements. White text on this background passes WCAG AA at 5.5:1. This is the color of commitment: "Rewrite", "Create account", "Sign in".
-- **Editor's Green Fill Hover** (#065f46): The hover/pressed state of the fill. Feedback through a color shift, not a lift or a glow.
-- **Editor's Green Light** (#34d399): The dark-mode accent for focus rings, progress fills, and active labels. Compensates for the lower perceived brightness of dark surfaces.
+- **Oxford Blue** (`#002147`): the single identity hue. Primary buttons, active nav and filter states, focus rings, progress fill, and accent labels. Solid enough to fill a button and pass AA with white text.
+- **Oxford Blue Hover** (`#003366`): hover/pressed shift (light mode). Primary buttons additionally invert to outlined (white fill, oxford text) on hover.
+- **Oxford Soft** (`#7da7d9`): the dark-mode accent — the *same* hue lifted to read on dark surfaces. Drives `--accent` and every alpha ring in `.dark`. Not a second color.
+- **Oxford Deep** (`#0b1320`): Oxford pushed near-black; the dark-mode background of the auth identity panel.
 
-### Neutral
+### Surfaces
 
-The neutral scale is tinted toward the brand emerald (OKLCH hue ≈ 162.5°, chroma ≤ 0.008). Lightness values mirror Tailwind's gray so contrast ratios are unchanged; only the hue shifts for cohesion.
+- **Paper** (`#fdfbf7`): light page background. Warm off-white, not clinical white.
+- **Mat** (`#f3efe6` / dark `#1b1e24`): the outer "mat board" of the double-bezel.
+- **Inner surface** (`#ffffff` / dark `#1e2127`): the inset document surface.
+- **Ink** (`#1a1a1a`): default body text in light mode.
+- **Dark ramp:** `--dark-bg #16181c`, `--dark-paper #1e2127`, `--dark-paper-2 #23272f`, `--dark-border #313742`. Tinted noir, never dead black.
 
-- **Slate Wash 50** (#f8fbf9): Light-mode page background. Clean but not clinical — the green tint prevents sterile-gray.
-- **Slate Wash 100** (#f1f5f3): Input field backgrounds in light mode.
-- **Slate Wash 200** (#e4e8e6): Borders, dividers, card edges in light mode.
-- **Slate Wash 300** (#d1d6d3): Scrollbar thumb resting state, secondary borders.
-- **Slate Wash 400** (#9ea4a1): Placeholder text, disabled icons, tertiary content.
-- **Slate Wash 500** (#6e7370): Body metadata, secondary labels, timestamps.
-- **Slate Wash 600** (#505653): Dark-mode scrollbar hover, secondary text emphasis.
-- **Slate Wash 700** (#3d423f): Dark-mode card borders, separator lines.
-- **Slate Wash 800** (#262927): Dark-mode card borders, input borders.
-- **Slate Wash 900** (#161918): Dark-mode card backgrounds, surface containers.
-- **Slate Wash 950** (#060807): Dark-mode page background. Near-black with just enough green to avoid dead gray.
+### Neutral ramp
 
-**Implementation.** The eleven steps live as space-separated RGB channels in `:root` (`--gray-50` through `--gray-950` in `index.css`) and are the single source of truth. `tailwind.config.js` references them as `rgb(var(--gray-500) / <alpha-value>)`, so the JSX utilities (`bg-gray-50`, `text-gray-500`, `bg-gray-800/60`) and the raw component CSS (`.card`, `.field`, scrollbar, page background) read the same values, and Tailwind's `/opacity` modifiers keep working. Change a neutral once and it updates everywhere. The accent follows the same pattern: `--accent-rgb` is the channel form (so the focus ring is a true alpha of the identity hue), `--accent` the solid form.
+`--gray-50` … `--gray-950`, lightness mirroring Tailwind gray, hue nudged toward warm paper. Stored in `:root` as space-separated RGB channels so the same values feed both Tailwind utilities (`text-gray-700`, `bg-gray-800/60`) and the raw component CSS. `.label` defaults to `gray-700` (~10.5:1 on paper); `.label-muted` to `gray-600` (~7:1).
 
-### Named Rules
+**Implementation.** The ramp and accent are channel-backed: `tailwind.config.js` reads `rgb(var(--gray-500) / <alpha-value>)`, and `--accent-rgb` is the channel form so focus rings are a true alpha of the identity hue. `.dark` reassigns `--accent-rgb` to Oxford Soft once, and it cascades into `--accent` and every ring.
 
-**The One Voice Rule.** Editor's Green is the only chromatic color in the system. Every other hue (error red, delete-hover red) is inherited from the component library (Sonner toasts) and kept to their native context. If a new feature needs color, it uses Editor's Green or a tonal neutral. No second accent. No category colors. The accent's rarity is the point.
+### Named rule
+
+**The One Voice Rule.** Oxford Blue is the only chromatic color in the system. The only other hues are inherited, contextual: error/destructive red (delete confirm, error borders, Sonner toasts). No second brand accent, no category colors, no color-coding by rewrite mode. The accent's rarity is the point.
 
 ## 3. Typography
 
-**Body Font:** DM Sans (with system-ui, -apple-system, sans-serif fallback)
+Three faces, each with a distinct job — this is a register where serif reading type earns its place.
 
-**Character:** One family carries the entire interface. DM Sans is a humanist sans-serif with optical sizing — warm enough to avoid clinical sterility, precise enough for an editorial tool. No display font: headings are distinguished by weight (700) and tighter leading (1.2), not a second typeface.
+- **Display — EB Garamond** (600, line-height 1.08, tracking −0.015em, `text-wrap: balance`): page titles and the marketing taglines. Often set italic at hero scale (`text-5xl`–`text-6xl`).
+- **Body — Crimson Text** (400, 1.0625rem, line-height 1.6): all reading prose — the input draft, the rewritten output, history previews, helper text. This is the hero content face.
+- **Label — IBM Plex Mono** (`.label`, 500, uppercase, tracking 0.14em, `tabular-nums`): the "instrument" voice — field labels, word/char counts, timestamps, button text, nav links, progress readouts. The mono is the deliberate contrast axis against the two serifs.
 
-### Hierarchy
+### Named rule
 
-- **Heading** (700, 1.5rem / 24px, line-height 1.2): Page titles only — "Plagiarism Remover", "Rewrite History", "Welcome back", "Create account". Balanced wrapping via `text-wrap: balance`.
-- **Body** (400, 0.875rem / 14px, line-height 1.625): All prose content — input text, output paragraphs, descriptions, form helper text. Max line length is constrained by panel width, not an explicit `ch` cap.
-- **Label** (600, 0.75rem / 12px, line-height 1.5, tracking 0.025em, uppercase): Section identifiers — "Original Text", "Rewritten Text", "Original", "Rewritten". All uppercase labels use consistent `tracking-wide` (0.025em) and `font-semibold` (600).
-- **Caption** (400, 0.75rem / 12px, line-height 1.5): Metadata — word counts, character counts, timestamps, mode badges. Tabular figures (`tabular-nums`) on all numeric data to prevent horizontal jitter.
-- **Interactive** (500, 0.875rem / 14px): Button labels, mode selector text, nav links. Medium weight distinguishes clickable from static without competing with headings.
+**The Contrast-Axis Rule.** Hierarchy comes from *role contrast* (serif reading vs. mono instrument) and weight/size/case, not from piling on families. Display and body are both serifs but at genuinely different jobs and scales; the mono labels keep the UI chrome legibly separate from the prose. Don't introduce a fourth family or a geometric sans.
 
-### Named Rules
+## 4. Elevation & Surfaces
 
-**The One Family Rule.** DM Sans is the only font loaded. No display font, no monospace, no serif. Hierarchy is built from weight (400 → 500 → 600 → 700), size (12px → 14px → 24px), and case (sentence vs. uppercase), not from font switching. This eliminates a network request and keeps the typographic identity singular.
+**The Double-Bezel.** The signature surface is a matted document: an outer mat board (`.bezel`: `--mat` background, 1px `--mat-edge`, 12px radius, 7px padding "reveal") framing an inset inner surface (`.bezel-inner`: opaque white / dark-paper, 1px edge, 6px radius, a top bevel **highlight** and a faint ink-tinted **recess**). Depth reads from the frame and bevel, not a drop shadow.
 
-## 4. Elevation
+- **Shadows are tinted, not black:** `--shadow-sm/md/lg` carry the ink/identity hue (e.g. `rgba(0,33,71,…)`), so elevation stays cohesive with the palette.
+- **Interactive bezels** (`.bezel-interactive`) lift 2px and shift their border toward the accent on hover; `:focus-within` shows the accent ring.
+- `.card` remains as a flat alias of the inner surface for anything not using the full bezel.
 
-The system is flat by default. Depth is conveyed through tonal layering (background vs. card surface) and real borders, not shadows. Shadows exist but are deliberately quiet — ambient, not structural.
+### Named rule
 
-### Shadow Vocabulary
-
-- **Card rest** (`0 1px 2px rgba(13, 26, 20, 0.04), 0 2px 6px rgba(13, 26, 20, 0.04)`): A barely-visible lift. The green-tinted RGBA keeps the shadow cohesive with the neutral scale. Used on all `.card` surfaces in light mode.
-- **Card rest (dark)** (`0 1px 2px rgba(0, 0, 0, 0.25)`): Slightly heavier in dark mode to compensate for lower ambient contrast. Still quiet.
-- **Dropdown** (`shadow-lg` via Tailwind): The mode selector dropdown is the only elevated element that uses a visible shadow. It needs the lift because it overlays content.
-
-### Named Rules
-
-**The Flat-By-Default Rule.** Surfaces are opaque cards with real borders. No glassmorphism, no backdrop-blur, no frosted glass. The border does the separation work; the shadow is ambient reinforcement, not the primary depth cue. If a new component needs depth, use a border first; add a shadow only if the border alone doesn't resolve the layering.
+**The Framed-Surface Rule.** Surfaces are opaque and framed. No glassmorphism, no backdrop-blur, no frosted glass. The mat + bevel does the separation work; the tinted shadow is reinforcement, not the primary cue.
 
 ## 5. Components
 
-Tactile and precise. Firm surfaces, crisp edges, minimal ornament. Every element earns its space.
-
 ### Buttons
+- **Primary** (`.btn-primary`): Oxford fill, white mono uppercase label, 6px radius, 0.85rem×1.75rem padding. Hover **inverts** to white fill + oxford text; press is `scale(0.985)`. Dark mode fills with Oxford Soft (text `#0b1320`) and inverts to outlined. Disabled = 50% opacity, no color change.
+- **Ghost** (`.btn-ghost`): transparent, gray-600 mono label, hover deepens text + adds a faint tint. Reset, theme toggle, sign-out.
 
-- **Shape:** Gently curved edges (12px radius). Consistent across all button variants.
-- **Primary:** Editor's Green Fill (#047857) background, white text, 600 weight, 10px 24px padding. Feedback through a color shift to the hover fill (#065f46), not a lift or a glow.
-- **Press:** A small, fast scale-down (`scale(0.98)`) confirms the click. Tactile without flourish.
-- **Focus:** 2px solid outline in Editor's Green Fill, 2px offset. Visible and functional.
-- **Disabled:** 50% opacity, `cursor: not-allowed`. No color change — the opacity alone signals unavailability.
-- **Ghost:** Transparent background, Slate Wash 500 text, hover shifts to stronger text color + subtle tinted background. Used for Reset, theme toggle, and secondary nav actions.
-
-### Cards / Containers
-
-- **Corner Style:** Generously curved (16px radius). Consistent across all cards.
-- **Background:** Opaque white (#ffffff) in light mode, Slate Wash 900 (#161918) in dark mode. No transparency, no glass.
-- **Border:** 1px solid Slate Wash 200 (light) / Slate Wash 800 (dark). The border is the primary depth cue.
-- **Shadow:** Ambient only (see Elevation). The card class is the single source of truth for surface treatment.
-- **Internal Padding:** 16px standard, 20px for prose-heavy sections (expanded history panels, text areas), 32px for auth cards.
-
-### Inputs / Fields
-
-- **Style:** Slate Wash 50 background, Slate Wash 200 border, 12px radius. The slightly tinted background distinguishes inputs from the page surface without a heavy border.
-- **Primitive:** The `.field` class owns the shared chrome (full width, 12px radius, hairline border, 14px text, muted placeholder, focus ring). Background, padding, text color, and border color stay as utilities, so one class serves both the tinted auth inputs and the white history search bar. Replaces the former `.input-glow`.
-- **Components:** `TextField` (label + `.field` input + optional inline error: `aria-invalid`, `aria-describedby`, red border, message) and `PasswordField` (adds a self-managing show/hide toggle) wrap the primitive for the auth forms; both live in `components/ui/`. The history search uses the bare `.field` class directly.
-- **Focus:** Border shifts to Editor's Green, with a 3px functional ring (`rgb(var(--accent-rgb) / 0.18)`, an alpha of the accent). A ring, not a glow: structural feedback, not decoration.
-- **Panel focus-within:** Textarea panels use a subtler ring (`0.14` opacity) on `:focus-within`, providing container-level feedback without competing with the field focus.
-- **Error:** Border shifts to red-300 (light) / red-700 (dark). Paired with a red error message below the field.
-
-### Chips / Filters
-
-- **Active:** Pale emerald background (`emerald-100` / `emerald-950/40` dark), Editor's Green Fill text. The same accent treatment as active nav links — consistent "selected" affordance.
-- **Inactive:** Transparent background, Slate Wash 500 text, hover adds a subtle neutral background.
-- **Shape:** 8px radius, 6px 12px padding. Smaller corners than cards — chips are denser elements.
+### Fields (`.field`)
+- White / dark-paper background, 1px gray-300 / dark-border, 6px radius, Crimson Text at 1.0625rem. Focus shifts the border to the accent with a 3px accent-alpha ring (0.16); textarea panels echo this at `:focus-within` (0.14) via `.panel-glow`.
+- `TextField` wraps `.field` with a bound `<label>` and inline error (`aria-invalid` + `aria-describedby` + **red border** + message). `PasswordField` adds a self-managing show/hide toggle. The history search uses the bare `.field`.
+- **Cascade note:** component classes live in `@layer components`; Tailwind utilities (`@layer utilities`) are ordered after, so utilities on the same element win (e.g. the red error border, an active link's `text-white`). Keep custom component CSS inside `@layer components` — unlayered rules silently beat every utility and reintroduce contrast bugs.
 
 ### Navigation
+- Fixed top bar (`z-sticky`), translucent-free `bg-paper` / `bg-ink-bg`, 1px bottom border that appears on scroll. **Pages offset content with `pt-28`** so the fixed bar never overlaps the page heading.
+- Links sit in a pill group. **Active** = Oxford fill + white text (the one "selected" pattern, shared with history filter chips). **Inactive** = gray-600 mono, hover deepens. Labels: "Workspace", "History" (match the page headings).
+- A skip link (`#main-content`) is the first focusable element; both `<main>` targets are `tabIndex={-1}` so focus lands there. Mobile uses a hamburger panel with 44px touch targets.
 
-- **Structure:** Sticky top bar, 56px height (h-14), max-width 7xl centered. White / Slate Wash 900 background with a 1px bottom border.
-- **Active link:** Editor's Green text + pale emerald background tint. The same visual treatment as active chips — one "selected" pattern across the entire app.
-- **Inactive link:** Slate Wash 600 text, hover shifts to stronger text + subtle neutral background.
-- **Mobile:** Hamburger toggle reveals a dropdown panel with `menuDown` animation (translateY from -6px). Links use 44px minimum touch targets.
-- **Separator:** 1px vertical divider between nav links and utility actions (theme toggle, logout).
+### Mode selector (rewrite style)
+- Trigger styled as a form control (bezel-inner), chevron rotates on open. Opens upward (`bottom-full`) as a bezel panel; each option is icon + label + description.
+- **Keyboard:** `role="listbox"` / `role="option"`; opens on Arrow keys from the trigger; Arrow Up/Down, Home/End move focus between options; Escape closes and restores focus to the trigger; Tab closes. Selected option is focused on open.
 
-### Mode Selector
+### Progress bar
+- 8px track (gray-200 / dark ink-raised), Oxford fill animated by width only (`ease-out-quint`, 0.4s). Status text "Rewriting paragraph X of Y" with `aria-live="polite"`; percentage in accent, `tabular-nums`. Full `role="progressbar"` ARIA.
 
-- **Trigger:** Styled as a form control, not a button — Slate Wash 50 background, 200 border, 12px radius. Hover shifts border to emerald. Includes a chevron rotation on open.
-- **Dropdown:** Opens upward from the trigger (`bottom-full`). White / Slate Wash 900 background, 16px radius, visible shadow. Each option shows an icon + label + description.
-- **Keyboard:** Full arrow-key navigation, Home/End, Escape to close and restore focus to trigger. ARIA `listbox` / `option` roles with `aria-selected`.
-- **Animation:** `menuIn` — opacity + translateY(4px) + scale(0.98) to 1. 150ms, quint easing. Brisk and functional.
+### History card
+- A bezel-interactive surface (one level of containment — never a card inside a card). Header row = mode chip + timestamp + truncated source + word counts; expand reveals a two-column Original / Rewritten preview. Reuse loads the draft back into the workspace; delete uses an inline two-step confirm (not a modal), with focus moved to the confirm button.
 
-### Progress Bar
+## 6. Motion
 
-- **Track:** 8px height, Slate Wash 100 background, full-round radius.
-- **Fill:** Editor's Green (#10b981), animated width via `ease-out-quint` over 400ms. The width IS the state — nothing else moves.
-- **Dark mode fill:** Editor's Green Light (#34d399) for visibility against the dark track.
-- **Status text:** "Rewriting paragraph X of Y…" with `aria-live="polite"`. Percentage in Editor's Green, `tabular-nums`, bold.
+- **Stateful only.** Entrances, menu open/close, paragraph arrival, copy-confirmed, progress width. No ambient float, drift, shimmer, or glow.
+- **Timing:** 150–400ms, `--ease-out-quint` / `--ease-out-expo`. No bounce, no elastic.
+- **Reduced motion is enforced in two places:** the CSS `@media (prefers-reduced-motion: reduce)` block neutralizes CSS animation/transition, and `<MotionConfig reducedMotion="user">` in `App.jsx` makes every Framer Motion animation (page fades, card stagger, dropdown, progress width) honor the OS setting. Both are required — the CSS block alone does not cover JS-driven motion.
 
-## 6. Do's and Don'ts
+## 7. Do's and Don'ts
 
-### Do:
+### Do
+- Use Oxford Blue as the sole chromatic accent; rarity is identity.
+- Keep custom component CSS inside `@layer components` so utilities can override it.
+- Use the double-bezel for primary surfaces; one level of containment only.
+- Use `tabular-nums` on all numeric readouts; `text-wrap: balance` on headings, `pretty` on prose.
+- Offset fixed-nav pages with `pt-28`; make skip-link targets focusable (`tabIndex={-1}`).
+- Give the mode selector (and any listbox) full keyboard support: arrows, Home/End, Escape.
+- Respect reduced motion in **both** CSS and Framer (`MotionConfig`).
+- Keep copy plain and direct ("Rewrite deleted", "Signed out", "Passwords do not match"). One vocabulary across inline errors and toasts.
 
-- **Do** use Editor's Green as the sole chromatic accent. Rarity is identity.
-- **Do** use opaque cards with real borders for all surface separation. The border does the work.
-- **Do** use `tabular-nums` on all numeric displays (word counts, char counts, progress percentages) to prevent horizontal jitter.
-- **Do** apply `text-wrap: balance` to all headings for even line breaks.
-- **Do** keep uppercase labels at `font-semibold` (600) and `tracking-wide` (0.025em) everywhere — never `font-bold` at this size.
-- **Do** animate state changes (menu open, paragraph arrive, copy confirmed) and nothing else.
-- **Do** respect `prefers-reduced-motion` with a thorough global override.
-- **Do** provide 44px minimum touch targets on coarse-pointer devices via the `tap-target` utility.
-- **Do** use `safe-area-inset-*` padding for notched/rounded devices.
-
-### Don't:
-
-- **Don't** use gradient backgrounds, gradient text, or multi-color fills. "Generic gradient-soup AI SaaS" is the primary anti-reference — avoid it by name.
-- **Don't** use glassmorphism, backdrop-blur, frosted glass, or any transparency effect on surfaces. Cards are opaque. Always.
-- **Don't** use more than one font family. DM Sans carries everything.
-- **Don't** add a second accent color. No secondary hue, no category colors, no color-coding by mode. Editor's Green is the only voice.
-- **Don't** use ambient motion (float, drift, shimmer, pulse, particle effects). Animation is earned by state change.
-- **Don't** use `border-left` wider than 1px as a colored stripe or accent marker.
-- **Don't** use emoji as UI elements or decorative icons. The product serves academic users; emoji undermines trust.
-- **Don't** add "AI" badges, "Powered by AI" labels, or sparkle icons on the main interface. The user knows it's AI-powered. Saying it again signals "template."
-- **Don't** use Syne, Inter, or any saturated "AI product" typeface. If DM Sans is ever replaced, the replacement must be chosen deliberately, not reflexively.
-- **Don't** use hero-metric templates, numbered section markers, or card grids as landing page patterns. This is a product, not a marketing page.
-- **Don't** nest cards inside cards. One level of containment maximum.
+### Don't
+- Don't use gradients, gradient text, glassmorphism, or backdrop-blur on surfaces.
+- Don't add a second accent or category colors.
+- Don't write component CSS outside `@layer` (it silently overrides utilities and breaks active-state contrast and error borders).
+- Don't load decorative assets from third-party hosts; inline an SVG grain instead.
+- Don't let the theme leak into the *words* — the Archival Desk metaphor lives in pixels (serifs, mat, mono labels), not in jargon like "expunge" or "passcode".
+- Don't use ambient motion, bounce/elastic easing, or em dashes in UI copy.
+- Don't add "AI"/"Powered by AI" badges or sparkle icons.
+- Don't nest cards/bezels.

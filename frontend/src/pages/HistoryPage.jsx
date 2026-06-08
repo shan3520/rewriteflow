@@ -5,8 +5,9 @@ import Navbar from '../components/Navbar.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { getHistory, deleteHistoryItem } from '../lib/api.js'
 import { toast } from 'sonner'
-import { Trash2, ChevronDown, Loader2, Clock, FileText, RotateCcw, Search, X, Sparkles, Book } from 'lucide-react'
+import { Trash2, ChevronDown, Clock, FileText, RotateCcw, Search, X, Book } from 'lucide-react'
 import { cn } from '../lib/cn.js'
+import { MODES, modeLabel } from '../lib/modes.js'
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleString(undefined, {
@@ -39,9 +40,9 @@ const HistoryCard = memo(function HistoryCard({ item, onDelete, onReuse, index }
     setDeleting(true)
     try {
       await onDelete(item.id)
-      toast.success('Document record expunged.')
+      toast.success('Rewrite deleted.')
     } catch (err) {
-      toast.error(err.message || "Unable to expunge record.")
+      toast.error(err.message || "Couldn't delete that rewrite.")
       setDeleting(false)
       setConfirming(false)
     }
@@ -73,7 +74,7 @@ const HistoryCard = memo(function HistoryCard({ item, onDelete, onReuse, index }
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-4 flex-wrap mb-3">
               <span className="label label-accent text-[10px] px-2 py-1 rounded border border-[color:var(--accent)]/25">
-                {item.mode}
+                {modeLabel(item.mode)}
               </span>
               <span className="label text-[11px] flex items-center gap-2">
                 <Clock size={12} /> {formatDate(item.created_at)}
@@ -195,7 +196,7 @@ export default function HistoryPage() {
     if (!session) return
     getHistory(session)
       .then(data => setHistory(data.rewrites || data || []))
-      .catch((err) => toast.error(err.message || "Archival retrieval failed."))
+      .catch((err) => toast.error(err.message || "Couldn't load your history."))
       .finally(() => setLoading(false))
   }, [session])
 
@@ -227,7 +228,7 @@ export default function HistoryPage() {
     <div className="min-h-svh flex flex-col bg-paper dark:bg-ink-bg">
       <Navbar />
 
-      <main id="main-content" className="flex-1 max-w-5xl mx-auto w-full safe-px py-16 focus:outline-none" tabIndex={-1}>
+      <main id="main-content" className="flex-1 max-w-5xl mx-auto w-full safe-px pt-28 pb-16 focus:outline-none" tabIndex={-1}>
         {/* Header */}
         <div className="mb-14 border-b border-gray-300 dark:border-ink-border pb-12">
           <div className="flex items-center gap-4 mb-6">
@@ -273,7 +274,7 @@ export default function HistoryPage() {
 
             {/* Mode filter */}
             <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-ink-surface border border-gray-200 dark:border-ink-border rounded-lg overflow-x-auto no-scrollbar">
-              {['all', 'standard', 'academic', 'aggressive', 'simplified', 'creative'].map((m) => (
+              {['all', ...MODES.map(m => m.value)].map((m) => (
                 <button
                   key={m}
                   onClick={() => setFilterMode(m)}
@@ -285,7 +286,7 @@ export default function HistoryPage() {
                       : "!text-gray-600 dark:!text-gray-400 hover:!text-oxford dark:hover:!text-white"
                   )}
                 >
-                  {m === 'all' ? 'All' : m}
+                  {m === 'all' ? 'All' : modeLabel(m)}
                 </button>
               ))}
             </div>
@@ -295,7 +296,7 @@ export default function HistoryPage() {
         {/* Empty state */}
         {!loading && history.length === 0 && (
           <div className="py-28 flex flex-col items-center justify-center text-center">
-            <div className="w-24 h-24 rounded-xl border border-dashed border-gray-300 dark:border-ink-border flex items-center justify-center mb-9 text-gray-400 dark:text-gray-600">
+            <div className="w-24 h-24 rounded-xl border border-dashed border-gray-300 dark:border-ink-border flex items-center justify-center mb-9 text-gray-500">
               <FileText size={44} strokeWidth={1} />
             </div>
             <h2 className="text-3xl text-gray-900 dark:text-white font-display mb-3">No rewrites yet</h2>
@@ -311,7 +312,7 @@ export default function HistoryPage() {
         {/* No results search */}
         {!loading && history.length > 0 && filtered.length === 0 && (
           <div className="py-24 flex flex-col items-center justify-center text-center">
-            <Search size={44} strokeWidth={1} className="text-gray-400 dark:text-gray-600 mb-5" />
+            <Search size={44} strokeWidth={1} className="text-gray-500 mb-5" />
             <h2 className="text-2xl text-gray-700 dark:text-gray-300 font-display">Nothing matches that search</h2>
             <p className="label text-[11px] mt-3">Try a different keyword or filter</p>
           </div>

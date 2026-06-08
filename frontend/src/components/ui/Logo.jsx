@@ -2,7 +2,7 @@ import { cn } from '../../lib/cn'
 
 export default function Logo({ className }) {
   return (
-    <div className={cn("flex items-center gap-3.5 group cursor-default select-none", className)}>
+    <div className={cn("flex items-center gap-3.5 group select-none", className)}>
       <div className="relative w-11 h-11 flex items-center justify-center">
         <div className="absolute inset-0 rounded-md border border-oxford dark:border-white opacity-25 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="font-display italic text-2xl text-oxford dark:text-white group-hover:scale-110 transition-transform duration-500">R</div>

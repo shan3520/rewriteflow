@@ -3,11 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase.js'
 import { toast } from 'sonner'
-import { Loader2, ArrowRight, Book, Library, GraduationCap } from 'lucide-react'
+import { ArrowRight, Book, Library } from 'lucide-react'
 import Logo from '../components/ui/Logo.jsx'
 import ThemeToggle from '../components/ui/ThemeToggle.jsx'
 import TextField from '../components/ui/TextField.jsx'
 import PasswordField from '../components/ui/PasswordField.jsx'
+
+// Inline paper grain (SVG turbulence) as a data URI — no third-party request.
+const PAPER_GRAIN = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E\")"
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,7 +18,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  useEffect(() => { document.title = 'Sign In · RewriteFlow' }, [])
+  useEffect(() => { document.title = 'Sign in · RewriteFlow' }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -32,11 +35,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-svh flex flex-col lg:flex-row bg-paper dark:bg-ink-bg">
       {/* Left Side: Professional Identity */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-oxford dark:bg-[#0b1320] p-20 flex-col justify-between overflow-hidden">
-        {/* Subtle texture overlay */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/parchment.png')]" />
-        </div>
+      <div className="hidden lg:flex lg:w-1/2 relative bg-oxford dark:bg-oxford-deep p-20 flex-col justify-between overflow-hidden">
+        {/* Self-hosted paper grain — no external dependency. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-[0.06] pointer-events-none mix-blend-overlay"
+          style={{ backgroundImage: PAPER_GRAIN }}
+        />
 
         <motion.div
           initial={{ opacity: 0 }}
@@ -48,15 +53,15 @@ export default function LoginPage() {
         </motion.div>
 
         <div className="relative z-10">
-          <motion.h2
+          <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-6xl text-[#fdfbf7] leading-[1.05] mb-12 font-display italic"
+            className="text-6xl text-paper leading-[1.05] mb-12 font-display italic"
           >
             A faithful rewrite, <br />
             paragraph by paragraph.
-          </motion.h2>
+          </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -65,23 +70,23 @@ export default function LoginPage() {
             className="space-y-10"
           >
             <div className="flex items-start gap-6">
-              <div className="w-10 h-10 rounded-md border border-[#fdfbf7]/25 flex items-center justify-center text-[#fdfbf7] mt-1 shrink-0">
+              <div className="w-10 h-10 rounded-md border border-paper/25 flex items-center justify-center text-paper mt-1 shrink-0">
                 <Library size={18} />
               </div>
               <div>
-                <h3 className="label text-[11px] !text-[#fdfbf7] mb-2.5">Meaning preserved</h3>
-                <p className="text-[#fdfbf7]/75 text-lg leading-relaxed max-w-sm font-serif">
+                <p className="label text-[11px] !text-paper mb-2.5">Meaning preserved</p>
+                <p className="text-paper/75 text-lg leading-relaxed max-w-sm font-serif">
                   Each paragraph is reworded on its own, so the result says what your draft said, in different words.
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-6">
-              <div className="w-10 h-10 rounded-md border border-[#fdfbf7]/25 flex items-center justify-center text-[#fdfbf7] mt-1 shrink-0">
+              <div className="w-10 h-10 rounded-md border border-paper/25 flex items-center justify-center text-paper mt-1 shrink-0">
                 <Book size={18} />
               </div>
               <div>
-                <h3 className="label text-[11px] !text-[#fdfbf7] mb-2.5">Five styles</h3>
-                <p className="text-[#fdfbf7]/75 text-lg leading-relaxed max-w-sm font-serif">
+                <p className="label text-[11px] !text-paper mb-2.5">Five styles</p>
+                <p className="text-paper/75 text-lg leading-relaxed max-w-sm font-serif">
                   Standard, Professional, Extensive, Clarified, or Expressive. Pick the tone that fits the document.
                 </p>
               </div>
@@ -89,15 +94,15 @@ export default function LoginPage() {
           </motion.div>
         </div>
 
-        <div className="relative z-10 pt-12 border-t border-[#fdfbf7]/15">
-          <p className="label text-[10px] !text-[#fdfbf7]/55">
+        <div className="relative z-10 pt-12 border-t border-paper/15">
+          <p className="label text-[10px] !text-paper/55">
             RewriteFlow, est. 2026
           </p>
         </div>
       </div>
 
       {/* Right Side: Disciplined Form */}
-      <div className="flex-1 flex flex-col bg-[#fdfbf7] dark:bg-[#1a1a1a]">
+      <div className="flex-1 flex flex-col bg-paper dark:bg-ink-bg">
         <div className="flex items-center justify-between p-8 lg:hidden">
           <Logo />
           <ThemeToggle />

@@ -149,172 +149,184 @@ textarea {
   border-radius: 3px;
 }
 
-/* ── Instrument label ────────────────────────────────────────
-   Mono micro-labels and tabular data. This is the contrast axis
-   against the serifs, and it carries an AA-safe muted color so the
-   old text-gray-400 contrast failures are fixed at the source. */
+/* ── Component layer ──────────────────────────────────────────
+   These classes live INSIDE @layer components on purpose. Tailwind
+   emits utilities in @layer utilities, which is ordered after
+   components, so a utility on the same element (e.g. text-white on an
+   active nav link, or border-red-300 on an errored field) now wins.
+   Previously these rules were unlayered and silently beat every
+   utility regardless of source order — that broke active-state
+   contrast, the tinted auth inputs, and the red error border. */
 
-.label {
-  font-family: var(--font-mono);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-variant-numeric: tabular-nums;
-  color: rgb(var(--gray-700));            /* ~10.5:1 on paper */
-}
-.dark .label { color: rgb(var(--gray-300)); }
-.label-accent { color: var(--accent); font-weight: 600; }
-.label-muted { color: rgb(var(--gray-600)); }      /* ~7:1, the quieter tier */
-.dark .label-muted { color: rgb(var(--gray-400)); }
+@layer components {
+  /* ── Instrument label ────────────────────────────────────────
+     Mono micro-labels and tabular data. This is the contrast axis
+     against the serifs, and it carries an AA-safe muted color so the
+     old text-gray-400 contrast failures are fixed at the source. */
 
-/* ── Double-Bezel surface ────────────────────────────────────
-   Outer mat board frames an inset inner surface. The inner carries a
-   top highlight + a faint recess so the edge reads as beveled, like a
-   matted document. Depth comes from the frame, not a drop shadow. */
+  .label {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--gray-700));            /* ~10.5:1 on paper */
+  }
+  .dark .label { color: rgb(var(--gray-300)); }
+  .label-accent { color: var(--accent); font-weight: 600; }
+  .label-muted { color: rgb(var(--gray-600)); }      /* ~7:1, the quieter tier */
+  .dark .label-muted { color: rgb(var(--gray-400)); }
 
-.bezel {
-  position: relative;
-  background: var(--mat);
-  border: 1px solid var(--mat-edge);
-  border-radius: 12px;
-  padding: 7px;                 /* the mat reveal */
-  box-shadow: var(--shadow-md);
-  transition: box-shadow 0.32s var(--ease-out-quint),
-              border-color 0.32s var(--ease-out-quint),
-              transform 0.32s var(--ease-out-quint);
+  /* ── Double-Bezel surface ────────────────────────────────────
+     Outer mat board frames an inset inner surface. The inner carries a
+     top highlight + a faint recess so the edge reads as beveled, like a
+     matted document. Depth comes from the frame, not a drop shadow. */
+
+  .bezel {
+    position: relative;
+    background: var(--mat);
+    border: 1px solid var(--mat-edge);
+    border-radius: 12px;
+    padding: 7px;                 /* the mat reveal */
+    box-shadow: var(--shadow-md);
+    transition: box-shadow 0.32s var(--ease-out-quint),
+                border-color 0.32s var(--ease-out-quint),
+                transform 0.32s var(--ease-out-quint);
+  }
+
+  .bezel-inner {
+    position: relative;
+    height: 100%;
+    background: var(--inner-surface);
+    border: 1px solid var(--inner-edge);
+    border-radius: 6px;
+    box-shadow: inset 0 1px 0 var(--bezel-highlight),
+                0 1px 2px var(--bezel-recess);
+  }
+
+  .bezel-interactive { cursor: pointer; }
+  .bezel-interactive:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--mat-edge));
+    transform: translateY(-2px);
+  }
+  .bezel-interactive:focus-within {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-lg), 0 0 0 3px rgb(var(--accent-rgb) / 0.18);
+  }
+
+  /* Legacy .card kept as an alias of the inner surface so anything not yet
+     migrated still reads as a real surface, not a flat box. */
+  .card {
+    background: var(--inner-surface);
+    border: 1px solid var(--inner-edge);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.2s var(--ease-out-quint), box-shadow 0.2s var(--ease-out-quint);
+  }
+
+  /* ── Primary button ──────────────────────────────────────────
+     Solid Oxford fill that inverts to outlined on hover. */
+
+  .btn-primary {
+    background: var(--oxford-blue);
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 6px;
+    padding: 0.85rem 1.75rem;
+    border: 1px solid var(--oxford-blue);
+    box-shadow: var(--shadow-sm);
+    transition: background 0.2s var(--ease-out-quint),
+                color 0.2s var(--ease-out-quint),
+                box-shadow 0.2s var(--ease-out-quint),
+                transform 0.08s var(--ease-out-quint);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: #ffffff;
+    color: var(--oxford-blue);
+    box-shadow: var(--shadow-md);
+  }
+  .btn-primary:active:not(:disabled) { transform: scale(0.985); box-shadow: var(--shadow-sm); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .dark .btn-primary {
+    background: rgb(var(--accent-soft));
+    border-color: rgb(var(--accent-soft));
+    color: #0b1320;
+  }
+  .dark .btn-primary:hover:not(:disabled) {
+    background: transparent;
+    color: rgb(var(--accent-soft));
+  }
+
+  /* Ghost / tertiary control. */
+  .btn-ghost {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--gray-600));
+    border-radius: 6px;
+    padding: 0.5rem 0.85rem;
+    transition: color 0.2s var(--ease-out-quint), background 0.2s var(--ease-out-quint);
+  }
+  .btn-ghost:hover { color: var(--oxford-blue); background: rgb(var(--gray-100)); }
+  .dark .btn-ghost { color: rgb(var(--gray-400)); }
+  .dark .btn-ghost:hover { color: #ffffff; background: rgb(var(--gray-800)); }
+
+  /* ── Text field ──────────────────────────────────────────── */
+
+  .field {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid rgb(var(--gray-300));
+    background: #ffffff;
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    color: rgb(var(--gray-900));
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s var(--ease-out-quint), box-shadow 0.2s var(--ease-out-quint), background 0.2s var(--ease-out-quint);
+  }
+  .dark .field {
+    background: var(--dark-paper);
+    border-color: var(--dark-border);
+    color: #f0ede6;
+  }
+  .field:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.16);
+  }
+
+  /* Textarea panel container-level focus echo. */
+  .panel-glow { transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+  .panel-glow:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.14);
+  }
+
+  /* ── Progress fill ────────────────────────────────────────── */
+
+  .progress-bar-fill {
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.4s var(--ease-out-quint);
+  }
+
+  /* Loading spinner ring, on the identity hue. */
+  .spinner {
+    border: 2px solid rgb(var(--accent-rgb) / 0.25);
+    border-top-color: var(--accent);
+    border-radius: 9999px;
+    animation: spin 0.7s linear infinite;
+  }
 }
 
-.bezel-inner {
-  position: relative;
-  height: 100%;
-  background: var(--inner-surface);
-  border: 1px solid var(--inner-edge);
-  border-radius: 6px;
-  box-shadow: inset 0 1px 0 var(--bezel-highlight),
-              0 1px 2px var(--bezel-recess);
-}
-
-.bezel-interactive { cursor: pointer; }
-.bezel-interactive:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: color-mix(in srgb, var(--accent) 38%, var(--mat-edge));
-  transform: translateY(-2px);
-}
-.bezel-interactive:focus-within {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-lg), 0 0 0 3px rgb(var(--accent-rgb) / 0.18);
-}
-
-/* Legacy .card kept as an alias of the inner surface so anything not yet
-   migrated still reads as a real surface, not a flat box. */
-.card {
-  background: var(--inner-surface);
-  border: 1px solid var(--inner-edge);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
-  transition: border-color 0.2s var(--ease-out-quint), box-shadow 0.2s var(--ease-out-quint);
-}
-
-/* ── Primary button ──────────────────────────────────────────
-   Solid Oxford fill that inverts to outlined on hover. */
-
-.btn-primary {
-  background: var(--oxford-blue);
-  color: #ffffff;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 0.8125rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  border-radius: 6px;
-  padding: 0.85rem 1.75rem;
-  border: 1px solid var(--oxford-blue);
-  box-shadow: var(--shadow-sm);
-  transition: background 0.2s var(--ease-out-quint),
-              color 0.2s var(--ease-out-quint),
-              box-shadow 0.2s var(--ease-out-quint),
-              transform 0.08s var(--ease-out-quint);
-}
-.btn-primary:hover:not(:disabled) {
-  background: #ffffff;
-  color: var(--oxford-blue);
-  box-shadow: var(--shadow-md);
-}
-.btn-primary:active:not(:disabled) { transform: scale(0.985); box-shadow: var(--shadow-sm); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.dark .btn-primary {
-  background: rgb(var(--accent-soft));
-  border-color: rgb(var(--accent-soft));
-  color: #0b1320;
-}
-.dark .btn-primary:hover:not(:disabled) {
-  background: transparent;
-  color: rgb(var(--accent-soft));
-}
-
-/* Ghost / tertiary control. */
-.btn-ghost {
-  font-family: var(--font-mono);
-  font-weight: 500;
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgb(var(--gray-600));
-  border-radius: 6px;
-  padding: 0.5rem 0.85rem;
-  transition: color 0.2s var(--ease-out-quint), background 0.2s var(--ease-out-quint);
-}
-.btn-ghost:hover { color: var(--oxford-blue); background: rgb(var(--gray-100)); }
-.dark .btn-ghost { color: rgb(var(--gray-400)); }
-.dark .btn-ghost:hover { color: #ffffff; background: rgb(var(--gray-800)); }
-
-/* ── Text field ──────────────────────────────────────────── */
-
-.field {
-  width: 100%;
-  border-radius: 6px;
-  border: 1px solid rgb(var(--gray-300));
-  background: #ffffff;
-  font-family: var(--font-body);
-  font-size: 1.0625rem;
-  color: rgb(var(--gray-900));
-  padding: 0.75rem 1rem;
-  transition: border-color 0.2s var(--ease-out-quint), box-shadow 0.2s var(--ease-out-quint), background 0.2s var(--ease-out-quint);
-}
-.dark .field {
-  background: var(--dark-paper);
-  border-color: var(--dark-border);
-  color: #f0ede6;
-}
-.field:focus {
-  border-color: var(--accent);
-  outline: none;
-  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.16);
-}
-
-/* Textarea panel container-level focus echo. */
-.panel-glow { transition: border-color 0.18s ease, box-shadow 0.18s ease; }
-.panel-glow:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.14);
-}
-
-/* ── Progress fill ────────────────────────────────────────── */
-
-.progress-bar-fill {
-  background: var(--accent);
-  border-radius: 999px;
-  transition: width 0.4s var(--ease-out-quint);
-}
-
-/* Loading spinner ring, on the identity hue. */
-.spinner {
-  border: 2px solid rgb(var(--accent-rgb) / 0.25);
-  border-top-color: var(--accent);
-  border-radius: 9999px;
-  animation: spin 0.7s linear infinite;
-}
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── Motion: stateful, not decorative ─────────────────────── */
@@ -343,7 +355,9 @@ textarea {
 .collapsible > * { overflow: hidden; opacity: 0; transition: opacity 0.28s var(--ease-out-quint); }
 .collapsible[data-open='true'] > * { opacity: 1; }
 
-/* Reduced motion: state still changes, it just doesn't travel. */
+/* Reduced motion: state still changes, it just doesn't travel.
+   This covers CSS animation/transition; JS-driven Framer Motion is
+   handled separately via <MotionConfig reducedMotion="user"> in App.jsx. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {

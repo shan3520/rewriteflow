@@ -4,16 +4,9 @@ import Navbar from '../components/Navbar.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { rewriteText } from '../lib/api.js'
 import { toast } from 'sonner'
-import { Copy, Check, Zap, ChevronDown, RotateCcw, Loader2, PenLine, GraduationCap, Shuffle, Feather, BookOpen } from 'lucide-react'
+import { Copy, Check, ChevronDown, RotateCcw, BookOpen } from 'lucide-react'
 import { cn } from '../lib/cn.js'
-
-const MODES = [
-  { value: 'standard', label: 'Standard', desc: 'Preserves the original document meaning', Icon: BookOpen },
-  { value: 'academic', label: 'Professional', desc: 'Formal tone and polished structure', Icon: GraduationCap },
-  { value: 'aggressive', label: 'Extensive', desc: 'Maximum restructuring for originality', Icon: Shuffle },
-  { value: 'simplified', label: 'Clarified', desc: 'Plain English for maximum readability', Icon: Feather },
-  { value: 'creative', label: 'Expressive', desc: 'A more literary and engaging approach', Icon: PenLine },
-]
+import { MODES } from '../lib/modes.js'
 
 const MAX_CHARS = 50_000
 
@@ -41,12 +34,16 @@ export default function AppPage() {
 
   const selectedMode = MODES.find(m => m.value === mode)
   const SelectedIcon = selectedMode.Icon
+  const modeIndex = MODES.findIndex(m => m.value === mode)
 
   useEffect(() => { document.title = 'RewriteFlow · AI Text Refinement' }, [])
 
   const lastParaRef = useCallback((node) => {
     if (!node || !loading) return
-    node.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    // A JS scrollIntoView with behavior:'smooth' overrides the reduced-motion CSS,
+    // so honor the preference explicitly during streaming.
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    node.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'end' })
   }, [loading])
 
   useEffect(() => {
@@ -60,6 +57,50 @@ export default function AppPage() {
     setMode(value)
     setModeOpen(false)
     triggerRef.current?.focus()
+  }
+
+  // When the listbox opens, move focus to the selected option so arrow keys
+  // and Escape work without a hunt for the menu.
+  useEffect(() => {
+    if (!modeOpen) return
+    const i = Math.max(0, modeIndex)
+    const raf = requestAnimationFrame(() => optionRefs.current[i]?.focus())
+    return () => cancelAnimationFrame(raf)
+  }, [modeOpen, modeIndex])
+
+  function handleTriggerKeyDown(e) {
+    if (!modeOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      e.preventDefault()
+      setModeOpen(true)
+    }
+  }
+
+  function handleListKeyDown(e) {
+    const count = MODES.length
+    const current = optionRefs.current.findIndex(el => el === document.activeElement)
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      setModeOpen(false)
+      triggerRef.current?.focus()
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      optionRefs.current[current < 0 ? 0 : (current + 1) % count]?.focus()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      optionRefs.current[current < 0 ? count - 1 : (current - 1 + count) % count]?.focus()
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      optionRefs.current[0]?.focus()
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      optionRefs.current[count - 1]?.focus()
+    } else if (e.key === 'Tab') {
+      // Close and hand focus back to the trigger so the next Tab proceeds in
+      // normal order instead of dropping to <body> as the options unmount.
+      e.preventDefault()
+      setModeOpen(false)
+      triggerRef.current?.focus()
+    }
   }
 
   async function handleRewrite() {
@@ -112,7 +153,13 @@ export default function AppPage() {
     <div className="min-h-svh flex flex-col bg-paper dark:bg-ink-bg">
       <Navbar />
 
-      <main id="main-content" className="flex-1 max-w-7xl mx-auto w-full safe-px py-16 focus:outline-none">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl mx-auto w-full safe-px pt-28 pb-16 focus:outline-none">
+        {/* Persistent status region: always in the DOM so screen readers announce
+            each progress update reliably (a region inserted already-populated may
+            not announce its first value). */}
+        <div className="sr-only" role="status" aria-live="polite">
+          {loading && progress.total > 0 ? `Rewriting paragraph ${progress.current} of ${progress.total}` : ''}
+        </div>
         {/* Header */}
         <div className="mb-16 border-b border-gray-300 dark:border-ink-border pb-12">
           <div className="flex items-center gap-4 mb-6">
@@ -178,7 +225,7 @@ export default function AppPage() {
                     </motion.div>
                   )}
                   {!loading && !outputText && (
-                    <div className="h-full flex flex-col items-center justify-center gap-4 text-gray-400 dark:text-gray-600">
+                    <div className="h-full flex flex-col items-center justify-center gap-4 text-gray-500">
                       <BookOpen size={44} strokeWidth={1} />
                       <span className="label text-[11px]">Your rewrite will appear here</span>
                     </div>
@@ -207,12 +254,14 @@ export default function AppPage() {
               <button
                 ref={triggerRef}
                 onClick={() => setModeOpen(o => !o)}
+                onKeyDown={handleTriggerKeyDown}
                 aria-haspopup="listbox"
+                aria-controls={modeOpen ? listboxId : undefined}
                 aria-expanded={modeOpen}
                 aria-label={`Rewrite style: ${selectedMode.label}`}
                 className="bezel-inner flex items-center gap-4 px-5 py-3.5 w-full sm:min-w-[240px] justify-between hover:border-[color:var(--accent)] transition-colors"
               >
-                <span className="flex items-center gap-3 label text-xs" style={{ color: 'var(--accent)' }}>
+                <span className="flex items-center gap-3 label text-xs text-[color:var(--accent)]">
                   <SelectedIcon size={16} />
                   {selectedMode.label}
                 </span>
@@ -222,18 +271,22 @@ export default function AppPage() {
               <AnimatePresence>
                 {modeOpen && (
                   <motion.ul
+                    id={listboxId}
                     role="listbox"
                     aria-label="Rewrite style"
+                    onKeyDown={handleListKeyDown}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 6 }}
                     transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute bottom-full mb-3 left-0 w-80 bezel z-dropdown"
+                    className="absolute bottom-full mb-3 left-0 w-full sm:w-80 bezel z-dropdown"
                   >
                     {MODES.map((m, i) => (
-                      <li key={m.value} role="option" aria-selected={mode === m.value}>
+                      <li key={m.value} role="presentation">
                         <button
                           ref={el => { optionRefs.current[i] = el }}
+                          role="option"
+                          aria-selected={mode === m.value}
                           onClick={() => selectMode(m.value)}
                           className={cn(
                             'w-full text-left px-6 py-4 rounded-md transition-colors',
@@ -297,7 +350,7 @@ export default function AppPage() {
               <div className="bezel">
                 <div className="bezel-inner p-7">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="label text-[11px]" aria-live="polite">
+                    <span className="label text-[11px]">
                       Rewriting paragraph {progress.current} of {progress.total}
                     </span>
                     <span className="label label-accent text-xs">{progressPct}%</span>

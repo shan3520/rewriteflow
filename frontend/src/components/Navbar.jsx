@@ -3,23 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { toast } from 'sonner'
-import { 
-  PenTool, 
-  Clock, 
-  LogOut, 
-  Menu, 
-  X, 
-  Sparkles,
-  ArrowRight,
-  Shield
-} from 'lucide-react'
+import { PenTool, Clock, LogOut, Menu, X } from 'lucide-react'
 import Logo from './ui/Logo'
 import ThemeToggle from './ui/ThemeToggle'
 import { cn } from '../lib/cn'
 
 const navLinks = [
-  { to: '/', label: 'The Workspace', Icon: PenTool },
-  { to: '/history', label: 'Archives', Icon: Clock },
+  { to: '/', label: 'Workspace', Icon: PenTool },
+  { to: '/history', label: 'History', Icon: Clock },
 ]
 
 export default function Navbar() {
@@ -31,7 +22,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -44,9 +35,9 @@ export default function Navbar() {
     setMobileOpen(false)
     try {
       await signOut()
-      toast.success('Session terminated.')
+      toast.success('Signed out.')
     } catch {
-      toast.error("Sign-out encountered an error.")
+      toast.error("Couldn't sign you out.")
     }
     navigate('/login')
   }

@@ -32,6 +32,7 @@ export default {
           DEFAULT: '#002147',
           hover: '#003366',
           soft: '#7da7d9',   // dark-mode accent: same hue, lifted
+          deep: '#0b1320',   // dark-mode auth panel: Oxford pushed near-black
         },
         gray: {
           50: 'rgb(var(--gray-50) / <alpha-value>)',
@@ -50,6 +51,7 @@ export default {
       zIndex: {
         dropdown: '1000',
         sticky: '1100',
+        'modal-backdrop': '1200',
         modal: '1300',
         toast: '1400',
         tooltip: '1500',
