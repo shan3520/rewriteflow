@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Environment files (NEVER commit these)
+.env
+.env.local
+.env.*.local
+
+# Build output
+frontend/dist/
+frontend/dist-ssr/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.sw?
+*.suo
+
+# Test artifacts
+.e2e_token.txt
+.e2e_rewrite_id.txt
+
+# Bud folder
+.bud/
+
+# Local AI / agent tooling scaffolding (not part of the product)
+.agents/
+.gemini/
+.claude/
+.impeccable/
+skills-lock.json
+user_prompt-*.md

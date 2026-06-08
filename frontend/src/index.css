@@ -1,0 +1,379 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design Tokens ──────────────────────────────────────────
+   The Archival Desk: heritage + precision. One identity hue
+   (Oxford Blue), serif type for reading, mono for instrument
+   labels, and a matted "double-bezel" surface language.
+
+   The neutral ramp is stored as space-separated RGB channels so
+   the same values feed both Tailwind (rgb(var(--gray-500) /
+   <alpha-value>)) and the raw component CSS below; opacity
+   modifiers like bg-gray-800/60 keep working. */
+
+:root {
+  --paper-bg: #fdfbf7;
+  --ink-black: #1a1a1a;
+  --oxford-blue: #002147;
+  --oxford-blue-hover: #003366;
+  --deep-green: #0b3d35;
+
+  /* Paper-tinted neutral ramp. Lightness mirrors Tailwind gray;
+     hue nudged toward the warm paper so nothing reads as dead gray. */
+  --gray-50: 253 251 247;
+  --gray-100: 245 243 238;
+  --gray-200: 232 230 223;
+  --gray-300: 214 212 204;
+  --gray-400: 168 165 156;
+  --gray-500: 122 119 108;
+  --gray-600: 89 86 78;
+  --gray-700: 64 61 54;
+  --gray-800: 38 37 34;
+  --gray-900: 26 26 26;
+  --gray-950: 10 10 10;
+
+  /* Accent — ONE identity hue at two lightnesses. The dark-mode
+     accent is the same blue lifted to read on a dark surface, not a
+     second color. --accent-rgb is the channel form so alpha rings are
+     a true tint of the identity; --accent resolves from it live. */
+  --accent-rgb: 0 33 71;            /* Oxford Blue */
+  --accent: rgb(var(--accent-rgb));
+  --accent-fill: #002147;
+  --accent-fill-hover: #003366;
+  --accent-soft: 125 167 217;       /* lifted azure (same hue, dark surface) */
+
+  /* Dark mode: scholarly noir. Tinted, never dead black. */
+  --dark-bg: #16181c;
+  --dark-paper: #1e2127;
+  --dark-paper-2: #23272f;
+  --dark-border: #313742;
+
+  /* Double-bezel / mat system. */
+  --mat: #f3efe6;                              /* outer mat board */
+  --mat-edge: rgb(var(--gray-300));
+  --inner-surface: #ffffff;
+  --inner-edge: rgb(var(--gray-200));
+  --bezel-highlight: rgba(255, 255, 255, 0.9); /* top inner light line */
+  --bezel-recess: rgba(26, 26, 26, 0.07);      /* ink-tinted, never pure black */
+
+  /* Tinted elevation: shadows carry the ink/identity hue, not black. */
+  --shadow-sm: 0 1px 2px rgba(26, 26, 26, 0.05);
+  --shadow-md: 0 6px 18px -6px rgba(0, 33, 71, 0.14), 0 2px 6px rgba(26, 26, 26, 0.05);
+  --shadow-lg: 0 22px 48px -16px rgba(0, 33, 71, 0.24), 0 6px 14px rgba(26, 26, 26, 0.07);
+
+  /* Type roles. Two serifs at genuinely different jobs (display vs.
+     reading) plus a mono for instrument labels and tabular data. */
+  --font-display: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --font-body: 'Crimson Text', Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Motion. ease-out-quint/expo were referenced project-wide but never
+     defined — every animation was silently falling back to default easing. */
+  --ease-sharp: cubic-bezier(0, 0, 0.2, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Semantic z-index scale (no arbitrary 999/9999). */
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-modal-backdrop: 1200;
+  --z-modal: 1300;
+  --z-toast: 1400;
+  --z-tooltip: 1500;
+}
+
+.dark {
+  --accent-rgb: var(--accent-soft);   /* cascades into --accent and every alpha ring */
+  --mat: #1b1e24;
+  --mat-edge: var(--dark-border);
+  --inner-surface: var(--dark-paper);
+  --inner-edge: #2a2f38;
+  --bezel-highlight: rgba(255, 255, 255, 0.05);
+  --bezel-recess: rgba(0, 0, 0, 0.45);
+}
+
+/* ── Base ────────────────────────────────────────────────── */
+
+* { box-sizing: border-box; }
+
+html { background-color: var(--paper-bg); scroll-behavior: smooth; }
+html.dark { background-color: var(--dark-bg); }
+
+body {
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  font-kerning: normal;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--ink-black);
+  background-color: var(--paper-bg);
+  line-height: 1.6;
+}
+
+.dark body {
+  color: #e7e4dd;
+  background-color: var(--dark-bg);
+}
+
+#root { min-height: 100svh; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  color: var(--oxford-blue);
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4 { color: #ffffff; }
+
+p { text-wrap: pretty; }
+
+textarea {
+  resize: none;
+  font-family: var(--font-body);
+}
+
+/* Placeholder: must clear 4.5:1, not the default light gray. */
+::placeholder { color: rgb(var(--gray-600)); opacity: 1; }
+.dark ::placeholder { color: rgb(var(--gray-500)); }
+
+/* Visible keyboard focus everywhere, on the identity hue. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ── Instrument label ────────────────────────────────────────
+   Mono micro-labels and tabular data. This is the contrast axis
+   against the serifs, and it carries an AA-safe muted color so the
+   old text-gray-400 contrast failures are fixed at the source. */
+
+.label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+  color: rgb(var(--gray-700));            /* ~10.5:1 on paper */
+}
+.dark .label { color: rgb(var(--gray-300)); }
+.label-accent { color: var(--accent); font-weight: 600; }
+.label-muted { color: rgb(var(--gray-600)); }      /* ~7:1, the quieter tier */
+.dark .label-muted { color: rgb(var(--gray-400)); }
+
+/* ── Double-Bezel surface ────────────────────────────────────
+   Outer mat board frames an inset inner surface. The inner carries a
+   top highlight + a faint recess so the edge reads as beveled, like a
+   matted document. Depth comes from the frame, not a drop shadow. */
+
+.bezel {
+  position: relative;
+  background: var(--mat);
+  border: 1px solid var(--mat-edge);
+  border-radius: 12px;
+  padding: 7px;                 /* the mat reveal */
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 0.32s var(--ease-out-quint),
+              border-color 0.32s var(--ease-out-quint),
+              transform 0.32s var(--ease-out-quint);
+}
+
+.bezel-inner {
+  position: relative;
+  height: 100%;
+  background: var(--inner-surface);
+  border: 1px solid var(--inner-edge);
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 var(--bezel-highlight),
+              0 1px 2px var(--bezel-recess);
+}
+
+.bezel-interactive { cursor: pointer; }
+.bezel-interactive:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--mat-edge));
+  transform: translateY(-2px);
+}
+.bezel-interactive:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-lg), 0 0 0 3px rgb(var(--accent-rgb) / 0.18);
+}
+
+/* Legacy .card kept as an alias of the inner surface so anything not yet
+   migrated still reads as a real surface, not a flat box. */
+.card {
+  background: var(--inner-surface);
+  border: 1px solid var(--inner-edge);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s var(--ease-out-quint), box-shadow 0.2s var(--ease-out-quint);
+}
+
+/* ── Primary button ──────────────────────────────────────────
+   Solid Oxford fill that inverts to outlined on hover. */
+
+.btn-primary {
+  background: var(--oxford-blue);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  padding: 0.85rem 1.75rem;
+  border: 1px solid var(--oxford-blue);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s var(--ease-out-quint),
+              color 0.2s var(--ease-out-quint),
+              box-shadow 0.2s var(--ease-out-quint),
+              transform 0.08s var(--ease-out-quint);
+}
+.btn-primary:hover:not(:disabled) {
+  background: #ffffff;
+  color: var(--oxford-blue);
+  box-shadow: var(--shadow-md);
+}
+.btn-primary:active:not(:disabled) { transform: scale(0.985); box-shadow: var(--shadow-sm); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.dark .btn-primary {
+  background: rgb(var(--accent-soft));
+  border-color: rgb(var(--accent-soft));
+  color: #0b1320;
+}
+.dark .btn-primary:hover:not(:disabled) {
+  background: transparent;
+  color: rgb(var(--accent-soft));
+}
+
+/* Ghost / tertiary control. */
+.btn-ghost {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(var(--gray-600));
+  border-radius: 6px;
+  padding: 0.5rem 0.85rem;
+  transition: color 0.2s var(--ease-out-quint), background 0.2s var(--ease-out-quint);
+}
+.btn-ghost:hover { color: var(--oxford-blue); background: rgb(var(--gray-100)); }
+.dark .btn-ghost { color: rgb(var(--gray-400)); }
+.dark .btn-ghost:hover { color: #ffffff; background: rgb(var(--gray-800)); }
+
+/* ── Text field ──────────────────────────────────────────── */
+
+.field {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid rgb(var(--gray-300));
+  background: #ffffff;
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  color: rgb(var(--gray-900));
+  padding: 0.75rem 1rem;
+  transition: border-color 0.2s var(--ease-out-quint), box-shadow 0.2s var(--ease-out-quint), background 0.2s var(--ease-out-quint);
+}
+.dark .field {
+  background: var(--dark-paper);
+  border-color: var(--dark-border);
+  color: #f0ede6;
+}
+.field:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.16);
+}
+
+/* Textarea panel container-level focus echo. */
+.panel-glow { transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+.panel-glow:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.14);
+}
+
+/* ── Progress fill ────────────────────────────────────────── */
+
+.progress-bar-fill {
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.4s var(--ease-out-quint);
+}
+
+/* Loading spinner ring, on the identity hue. */
+.spinner {
+  border: 2px solid rgb(var(--accent-rgb) / 0.25);
+  border-top-color: var(--accent);
+  border-radius: 9999px;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Motion: stateful, not decorative ─────────────────────── */
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes menuIn { from { opacity: 0; transform: translateY(4px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes menuDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes checkPop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+
+.animate-fade-in { animation: fadeIn 0.3s ease-out both; }
+.animate-fade-in-up {
+  animation: fadeInUp 0.35s var(--ease-out-quint) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+.animate-menu-in { animation: menuIn 0.15s var(--ease-out-quint) both; transform-origin: bottom left; }
+.animate-menu-down { animation: menuDown 0.2s var(--ease-out-quint) both; }
+.animate-check { animation: checkPop 0.22s var(--ease-out-quint) both; }
+
+.collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s var(--ease-out-quint);
+}
+.collapsible[data-open='true'] { grid-template-rows: 1fr; }
+.collapsible > * { overflow: hidden; opacity: 0; transition: opacity 0.28s var(--ease-out-quint); }
+.collapsible[data-open='true'] > * { opacity: 1; }
+
+/* Reduced motion: state still changes, it just doesn't travel. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .bezel-interactive:hover { transform: none; }
+  .animate-fade-in, .animate-fade-in-up, .animate-menu-in,
+  .animate-menu-down, .animate-check { animation: none !important; }
+}
+
+/* ── Touch & device adaptation ────────────────────────────── */
+
+@media (pointer: coarse) {
+  .tap-target { min-width: 44px; min-height: 44px; }
+  .field, .input-area { font-size: 16px; }
+}
+
+.safe-px {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+@media (min-width: 640px) {
+  .safe-px {
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
