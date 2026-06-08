@@ -1,5 +1,13 @@
 # RewriteFlow — AI-Powered Text Refinement
 
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-Hono-339933?logo=node.js&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Postgres-3FCF8E?logo=supabase&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-Llama_3.3_70B-F55036?logo=groq&logoColor=white)
+
 Rewrite text paragraph-by-paragraph using **Llama 3.3 70B** via Groq, with real-time streaming, Supabase auth, and persistent history. Built for writers, professionals, and creators who demand precision and originality.
 
 ## Tech Stack
@@ -114,4 +122,4 @@ Run `db/schema.sql` in your Supabase SQL Editor to create the `users` and `rewri
 
 ## License
 
-MIT
+Released under the [MIT License](LICENSE).
