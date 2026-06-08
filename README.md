@@ -61,7 +61,7 @@ npm run dev             # http://localhost:5173
 
 ## Database Setup
 
-Run `supabase_schema.sql` in your Supabase SQL Editor to create tables, triggers, and RLS policies.
+Run `db/schema.sql` in your Supabase SQL Editor to create tables, triggers, and RLS policies.
 
 ## Deployment
 
