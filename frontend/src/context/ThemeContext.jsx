@@ -15,11 +15,11 @@ export function ThemeProvider({ children }) {
     if (dark) {
       root.classList.add('dark')
       localStorage.setItem('theme', 'dark')
-      meta?.setAttribute('content', '#060807')   // gray-950
+      meta?.setAttribute('content', '#16181c')   // --dark-bg
     } else {
       root.classList.remove('dark')
       localStorage.setItem('theme', 'light')
-      meta?.setAttribute('content', '#f8fbf9')    // gray-50
+      meta?.setAttribute('content', '#fdfbf7')    // --paper-bg
     }
   }, [dark])
 

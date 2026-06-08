@@ -163,7 +163,7 @@ export default function AppPage() {
         {/* Header */}
         <div className="mb-16 border-b border-gray-300 dark:border-ink-border pb-12">
           <div className="flex items-center gap-4 mb-6">
-            <h1 className="text-5xl md:text-6xl font-display italic text-oxford dark:text-white">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-display italic text-oxford dark:text-white">
               RewriteFlow
             </h1>
           </div>
@@ -180,7 +180,7 @@ export default function AppPage() {
               <label htmlFor="input-textarea" className="label text-[11px]">Source document</label>
               <span className="label label-muted text-[11px]">{inputWordCount.toLocaleString()} words</span>
             </div>
-            <div className="bezel bezel-interactive h-[600px]">
+            <div className="bezel bezel-interactive h-[50vh] lg:h-[600px]">
               <textarea
                 id="input-textarea"
                 value={inputText}
@@ -209,8 +209,13 @@ export default function AppPage() {
                 )}
               </div>
             </div>
-            <div className="bezel h-[600px]">
-              <div className="bezel-inner h-full p-9 text-lg text-gray-900 dark:text-gray-100 overflow-y-auto leading-relaxed font-serif">
+            <div className="bezel h-[50vh] lg:h-[600px]">
+              <div
+                role="region"
+                aria-label="Refined output"
+                aria-busy={loading}
+                className="bezel-inner h-full p-9 text-lg text-gray-900 dark:text-gray-100 overflow-y-auto leading-relaxed font-serif"
+              >
                 <AnimatePresence mode="wait">
                   {loading && !outputText && (
                     <motion.div

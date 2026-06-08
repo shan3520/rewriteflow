@@ -17,7 +17,6 @@
   --ink-black: #1a1a1a;
   --oxford-blue: #002147;
   --oxford-blue-hover: #003366;
-  --deep-green: #0b3d35;
 
   /* Paper-tinted neutral ramp. Lightness mirrors Tailwind gray;
      hue nudged toward the warm paper so nothing reads as dead gray. */
@@ -138,9 +137,10 @@ textarea {
   font-family: var(--font-body);
 }
 
-/* Placeholder: must clear 4.5:1, not the default light gray. */
+/* Placeholder: must clear 4.5:1, not the default light gray. gray-500 on the
+   dark field surface is only ~3.6:1, so dark mode uses gray-400 (~6.8:1). */
 ::placeholder { color: rgb(var(--gray-600)); opacity: 1; }
-.dark ::placeholder { color: rgb(var(--gray-500)); }
+.dark ::placeholder { color: rgb(var(--gray-400)); }
 
 /* Visible keyboard focus everywhere, on the identity hue. */
 :where(a, button, input, textarea, select, [tabindex]):focus-visible {
@@ -346,15 +346,6 @@ textarea {
 .animate-menu-down { animation: menuDown 0.2s var(--ease-out-quint) both; }
 .animate-check { animation: checkPop 0.22s var(--ease-out-quint) both; }
 
-.collapsible {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.28s var(--ease-out-quint);
-}
-.collapsible[data-open='true'] { grid-template-rows: 1fr; }
-.collapsible > * { overflow: hidden; opacity: 0; transition: opacity 0.28s var(--ease-out-quint); }
-.collapsible[data-open='true'] > * { opacity: 1; }
-
 /* Reduced motion: state still changes, it just doesn't travel.
    This covers CSS animation/transition; JS-driven Framer Motion is
    handled separately via <MotionConfig reducedMotion="user"> in App.jsx. */
@@ -375,7 +366,7 @@ textarea {
 
 @media (pointer: coarse) {
   .tap-target { min-width: 44px; min-height: 44px; }
-  .field, .input-area { font-size: 16px; }
+  .field { font-size: 16px; }
 }
 
 .safe-px {
