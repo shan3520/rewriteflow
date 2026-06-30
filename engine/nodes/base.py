@@ -14,6 +14,9 @@ class BaseNode(ABC):
         self.name = name
         self.config = config or {}
 
+    def get_option(self, key: str, default: Any = None) -> Any:
+        return self.config.get(key, default)
+
     @abstractmethod
     def execute(self, text: str, context: PipelineContext) -> NodeResult:
         pass
