@@ -21,3 +21,28 @@ class TestTransformNodes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+from engine.nodes.paraphrase import ParaphraseNode
+from engine.nodes.summarize import SummarizeNode
+from engine.nodes.simplifier import SimplifierNode
+
+class TestAdvancedNodes(unittest.TestCase):
+    def test_paraphrase(self):
+        node = ParaphraseNode()
+        ctx = PipelineContext("It is important to start now.")
+        out = node.run(ctx)
+        self.assertIn("crucial", out)
+        self.assertIn("initiate", out)
+
+    def test_summarize(self):
+        node = SummarizeNode({"max_sentences": 1})
+        ctx = PipelineContext("First sentence here. Second sentence here. Third sentence here.")
+        out = node.run(ctx)
+        self.assertEqual(out, "First sentence here.")
+
+    def test_simplifier(self):
+        node = SimplifierNode()
+        ctx = PipelineContext("We will utilize this implementation subsequently.")
+        out = node.run(ctx)
+        self.assertIn("use", out)
+        self.assertIn("setup", out)
