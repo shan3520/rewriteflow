@@ -46,3 +46,26 @@ class TestAdvancedNodes(unittest.TestCase):
         out = node.run(ctx)
         self.assertIn("use", out)
         self.assertIn("setup", out)
+
+from engine.nodes.vocabulary import VocabularyEnhancerNode
+from engine.nodes.seo import SEOOptimizerNode
+from engine.nodes.style import StyleTransferNode
+
+class TestPersonaAndSeoNodes(unittest.TestCase):
+    def test_vocab_enhancer(self):
+        node = VocabularyEnhancerNode()
+        ctx = PipelineContext("This is a good project.")
+        out = node.run(ctx)
+        self.assertIn("exemplary", out)
+
+    def test_seo_optimizer(self):
+        node = SEOOptimizerNode({"keywords": ["ai", "rewrite"]})
+        ctx = PipelineContext("Transforming your documentation easily.")
+        res = node.execute(ctx.text, ctx)
+        self.assertIn("meta_title", res.metadata)
+
+    def test_style_transfer(self):
+        node = StyleTransferNode({"persona": "corporate"})
+        ctx = PipelineContext("We need to meet tomorrow.")
+        out = node.run(ctx)
+        self.assertTrue(out.startswith("Per our previous discussion:"))
