@@ -1,0 +1,8 @@
+name: Email Polish Pipeline
+version: 1.0
+nodes:
+  - type: GrammarFixNode
+  - type: ToneShiftNode
+    config:
+      target_tone: formal
+  - type: VocabularyEnhancerNode
