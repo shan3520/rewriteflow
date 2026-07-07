@@ -17,3 +17,17 @@ class TestPrompts(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+from engine.prompts.chain_of_thought import CoTReasoningBuilder
+from engine.prompts.versioning import PromptVersionManager
+
+class TestCoTAndVersioning(unittest.TestCase):
+    def test_cot_builder(self):
+        cot = CoTReasoningBuilder()
+        prompt = cot.build_prompt("Sample text")
+        self.assertIn("Think step by step:", prompt)
+
+    def test_version_manager(self):
+        mgr = PromptVersionManager()
+        mgr.register_version("tone", "v1.0", "Draft template {{ text }}")
+        self.assertEqual(mgr.get_template("tone", "v1.0"), "Draft template {{ text }}")
