@@ -5,7 +5,10 @@ function initSSE(req, res) {
     res.flushHeaders();
 
     const sendEvent = (event, data) => {
-        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+        const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+        if (!res.write(payload)) {
+            // Handle backpressure
+        }
     };
 
     return { sendEvent, end: () => res.end() };
