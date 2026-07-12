@@ -71,3 +71,18 @@ CREATE POLICY "Users can update own rewrites"
 CREATE POLICY "Users can delete own rewrites"
   ON public.rewrites FOR DELETE
   USING (auth.uid() = user_id);
+
+CREATE TABLE IF NOT EXISTS pipeline_templates (
+    id VARCHAR(64) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    config JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS rewrite_jobs (
+    id VARCHAR(64) PRIMARY KEY,
+    original_text TEXT NOT NULL,
+    rewritten_text TEXT,
+    status VARCHAR(32) DEFAULT 'PENDING',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
