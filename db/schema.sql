@@ -86,3 +86,7 @@ CREATE TABLE IF NOT EXISTS rewrite_jobs (
     status VARCHAR(32) DEFAULT 'PENDING',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Migration fix: Unique constraint naming alignment
+ALTER TABLE pipeline_templates DROP CONSTRAINT IF EXISTS unq_pipeline_name;
+ALTER TABLE pipeline_templates ADD CONSTRAINT unq_pipeline_name UNIQUE (name);
