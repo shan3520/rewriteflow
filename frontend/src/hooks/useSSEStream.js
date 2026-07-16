@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function useSSEStream(url) {
     const [data, setData] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
+    const eventSourceRef = useRef(null);
 
-    const startStream = (payload) => {
-        setIsStreaming(true);
-        // Connect to SSE endpoint
-    };
+    useEffect(() => {
+        return () => {
+            if (eventSourceRef.current) {
+                eventSourceRef.current.close();
+            }
+        };
+    }, []);
 
-    return { data, isStreaming, startStream };
+    return { data, isStreaming };
 }
