@@ -17,10 +17,11 @@ export default function CommandPalette() {
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-start justify-center pt-20 z-50">
+        <div role="dialog" aria-modal="true" aria-label="Command Palette" className="fixed inset-0 bg-black/70 flex items-start justify-center pt-20 z-50">
             <div className="bg-stone-900 border border-stone-700 rounded-lg p-4 w-full max-w-lg">
                 <input 
                     type="text" 
+                    aria-label="Command input search"
                     placeholder="Type a command or search..." 
                     className="w-full bg-stone-800 border border-stone-700 rounded px-3 py-2 text-stone-200 text-sm focus:outline-none"
                 />
