@@ -396,3 +396,9 @@ input[type="range"]::-webkit-slider-thumb {
 .timeline-rule {
     border-left: 2px solid rgba(245, 158, 11, 0.4);
 }
+
+/* High-contrast node editor dark theme */
+.canvas-node-card {
+    background-color: #1c1917;
+    border-color: #292524;
+}
