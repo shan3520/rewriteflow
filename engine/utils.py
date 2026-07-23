@@ -15,3 +15,6 @@ def count_syllables(word: str) -> int:
     word = word.lower()
     count = len(re.findall(r'[aeiouy]+', word))
     return max(1, count)
+
+def sanitize_utf8(text: str) -> str:
+    return text.encode('utf-8', errors='ignore').decode('utf-8')
