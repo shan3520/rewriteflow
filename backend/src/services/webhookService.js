@@ -4,10 +4,12 @@ class WebhookService {
     static generateSignature(payload, secret) {
         return crypto.createHmac('sha256', secret).update(JSON.stringify(payload)).digest('hex');
     }
-    static async dispatchWebhook(url, payload, secret) {
-        const sig = WebhookService.generateSignature(payload, secret);
-        console.log(`Dispatched webhook to ${url} with signature ${sig}`);
-        return { success: true };
+    static verifySignature(payload, signature, secret) {
+        const expected = WebhookService.generateSignature(payload, secret);
+        const a = Buffer.from(expected, 'hex');
+        const b = Buffer.from(signature, 'hex');
+        if (a.length !== b.length) return false;
+        return crypto.timingSafeEqual(a, b);
     }
 }
 module.exports = WebhookService;
