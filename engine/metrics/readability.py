@@ -18,3 +18,6 @@ class ReadabilityCalculator:
         L = (letters / words) * 100
         S = (sentences / words) * 100
         return 0.0588 * L - 0.296 * S - 15.8
+
+def normalize_score(score: float, min_val: float = 0.0, max_val: float = 100.0) -> float:
+    return max(min_val, min(max_val, score))
