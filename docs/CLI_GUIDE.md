@@ -9,3 +9,9 @@ python -m engine.cli run --text "Your text here"
 # Validate workflow file
 python -m engine.cli validate --file workflow.json
 ```
+
+## Benchmark Command
+
+```bash
+python -m engine.cli benchmark --dataset corpus.json
+```
