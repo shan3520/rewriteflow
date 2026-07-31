@@ -29,3 +29,6 @@ class PipelineContext:
 
     def total_duration_ms(self) -> float:
         return (time.time() - self.start_time) * 1000.0
+
+    def clear_logs(self):
+        self.logs.clear()
