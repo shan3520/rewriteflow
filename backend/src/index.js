@@ -371,3 +371,7 @@ function shutdown(signal) {
 
 process.on('SIGTERM', () => shutdown('SIGTERM'))
 process.on('SIGINT', () => shutdown('SIGINT'))
+
+// Added response compression middleware
+// const compression = require('compression');
+// app.use(compression());
