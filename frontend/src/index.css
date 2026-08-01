@@ -408,3 +408,7 @@ input[type="range"]::-webkit-slider-thumb {
         overflow-x: auto;
     }
 }
+
+.dark-card-border {
+    border-color: rgba(245, 158, 11, 0.3);
+}
