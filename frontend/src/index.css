@@ -402,3 +402,9 @@ input[type="range"]::-webkit-slider-thumb {
     background-color: #1c1917;
     border-color: #292524;
 }
+
+@media (max-width: 640px) {
+    .canvas-container {
+        overflow-x: auto;
+    }
+}
