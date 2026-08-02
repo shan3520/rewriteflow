@@ -1,0 +1,6 @@
+name: Technical Doc Generator
+version: 1.0
+nodes:
+  - type: CodeCommenterNode
+  - type: MarkdownFormattingNode
+  - type: SimplifierNode

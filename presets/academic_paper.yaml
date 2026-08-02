@@ -1,0 +1,10 @@
+name: Academic Paper Polish
+version: 1.0
+nodes:
+  - type: GrammarFixNode
+  - type: ToneShiftNode
+    config:
+      target_tone: formal
+  - type: StyleTransferNode
+    config:
+      persona: academic

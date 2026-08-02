@@ -1,0 +1,7 @@
+name: SEO Article Optimizer
+version: 1.0
+nodes:
+  - type: ParaphraseNode
+  - type: SEOOptimizerNode
+    config:
+      keywords: ["content rewriter", "ai workflow"]
