@@ -1,8 +1,13 @@
-"""Text processing utility helpers."""
+"""Text utilities with Unicode normalization."""
+import unicodedata
 import re
 from typing import List
 
+def normalize_text(text: str) -> str:
+    return unicodedata.normalize('NFC', text)
+
 def tokenize_sentences(text: str) -> List[str]:
+    text = normalize_text(text)
     return [s.strip() for s in re.split(r'[.!?]+', text) if s.strip()]
 
 def clean_whitespace(text: str) -> str:
@@ -15,6 +20,3 @@ def count_syllables(word: str) -> int:
     word = word.lower()
     count = len(re.findall(r'[aeiouy]+', word))
     return max(1, count)
-
-def sanitize_utf8(text: str) -> str:
-    return text.encode('utf-8', errors='ignore').decode('utf-8')
