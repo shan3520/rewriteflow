@@ -4,11 +4,12 @@ function initSSE(req, res) {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
+    req.on('close', () => {
+        console.log('Client closed SSE connection.');
+    });
+
     const sendEvent = (event, data) => {
-        const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-        if (!res.write(payload)) {
-            // Handle backpressure
-        }
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
     };
 
     return { sendEvent, end: () => res.end() };
