@@ -1,18 +1,9 @@
 {
-  "name": "rewriteai-backend",
-  "version": "1.0.0",
-  "description": "RewriteAI Hono backend",
-  "type": "module",
+  "name": "rewriteflow-backend",
+  "version": "1.2.0",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
-  },
-  "dependencies": {
-    "@hono/node-server": "^1.13.7",
-    "@supabase/supabase-js": "^2.49.8",
-    "dotenv": "^16.5.0",
-    "groq-sdk": "^0.15.0",
-    "hono": "^4.7.11"
+    "test": "jest"
   }
 }
