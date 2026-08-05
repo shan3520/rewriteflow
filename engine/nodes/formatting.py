@@ -10,5 +10,5 @@ class MarkdownFormattingNode(BaseNode):
     def execute(self, text: str, context: PipelineContext) -> NodeResult:
         res = text
         # Normalize header spaces: "#Header" -> "# Header"
-        res = re.sub(r'^(#+)([^#\s])', r' ', res, flags=re.MULTILINE)
+        res = re.sub(r'^(#+)([^#\s])', r'\g<1> \g<2>', res, flags=re.MULTILINE)
         return NodeResult(res, {"markdown_formatted": True})

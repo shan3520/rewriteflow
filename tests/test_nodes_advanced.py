@@ -8,8 +8,7 @@ from engine.nodes.formatting import MarkdownFormattingNode
 class TestAdvancedNodes(unittest.TestCase):
     def test_code_commenter(self):
         node = CodeCommenterNode()
-        ctx = PipelineContext("def process_data():
-    pass")
+        ctx = PipelineContext("def process_data():\n    pass")
         out = node.run(ctx)
         self.assertIn("Docstring for process_data", out)
 
