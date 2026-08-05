@@ -39,3 +39,6 @@ Thumbs.db
 .impeccable/
 skills-lock.json
 user_prompt-*.md
+
+__pycache__/
+*.pyc
