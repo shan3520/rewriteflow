@@ -1,0 +1,62 @@
+[
+  {
+    "kind": "mode",
+    "mode": "standard",
+    "options": {},
+    "expected": "You are a professional editor. Rewrite the following text with fresh wording and varied sentence structure while keeping its meaning exactly the same.\n\nPreserve every fact, number, name, quotation and citation exactly unless an instruction explicitly requires changing it. Do not add facts that are not in the original.\n\nOutput only the resulting text, with no preamble, notes or quotation marks around it."
+  },
+  {
+    "kind": "mode",
+    "mode": "academic",
+    "options": {
+      "length": "shorter",
+      "formality": "formal"
+    },
+    "expected": "You are an editor for academic and professional writing. Rewrite the following text in a formal, polished register with precise vocabulary, clear structure and smooth transitions.\n\nMake the result noticeably shorter than the original (roughly 20 to 40 percent fewer words).\n\nUse a formal register.\n\nPreserve every fact, number, name, quotation and citation exactly unless an instruction explicitly requires changing it. Do not add facts that are not in the original.\n\nOutput only the resulting text, with no preamble, notes or quotation marks around it."
+  },
+  {
+    "kind": "workflow",
+    "workflow": {
+      "steps": [
+        {
+          "id": "grammar"
+        },
+        {
+          "id": "translate",
+          "params": {
+            "lang": "French"
+          }
+        }
+      ],
+      "custom_instruction": "Keep it short."
+    },
+    "options": {
+      "length": "longer"
+    },
+    "expected": "You are a careful editor.\n\nApply the following edits to the text, in order:\n1. Correct spelling, grammar and punctuation errors. Do not otherwise change the wording.\n2. Translate the text into French, keeping names, numbers and formatting intact.\n\nAdditional instructions from the user:\nKeep it short.\n\nMake the result somewhat longer than the original by adding clarifying detail, without inventing facts.\n\nPreserve every fact, number, name, quotation and citation exactly unless an instruction explicitly requires changing it. Do not add facts that are not in the original.\n\nOutput only the resulting text, with no preamble, notes or quotation marks around it."
+  },
+  {
+    "kind": "workflow",
+    "workflow": {
+      "steps": [
+        {
+          "id": "summarize"
+        }
+      ],
+      "custom_instruction": ""
+    },
+    "options": {},
+    "expected": "You are a careful editor.\n\nApply the following edits to the text, in order:\n1. Condense the text to its key points in at most 2 sentences.\n\nPreserve every fact, number, name, quotation and citation exactly unless an instruction explicitly requires changing it. Do not add facts that are not in the original.\n\nOutput only the resulting text, with no preamble, notes or quotation marks around it."
+  },
+  {
+    "kind": "workflow",
+    "workflow": {
+      "steps": [],
+      "custom_instruction": "Only fix typos."
+    },
+    "options": {
+      "formality": "casual"
+    },
+    "expected": "You are a careful editor.\n\nAdditional instructions from the user:\nOnly fix typos.\n\nUse a relaxed, conversational register.\n\nPreserve every fact, number, name, quotation and citation exactly unless an instruction explicitly requires changing it. Do not add facts that are not in the original.\n\nOutput only the resulting text, with no preamble, notes or quotation marks around it."
+  }
+]

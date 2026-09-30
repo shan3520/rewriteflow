@@ -10,6 +10,8 @@ const LoginPage = lazy(() => import('./pages/LoginPage.jsx'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage.jsx'))
 const AppPage = lazy(() => import('./pages/AppPage.jsx'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage.jsx'))
+const WorkflowsPage = lazy(() => import('./pages/WorkflowsPage.jsx'))
+const BatchPage = lazy(() => import('./pages/BatchPage.jsx'))
 
 function PageFallback() {
   return (
@@ -50,6 +52,8 @@ export default function App() {
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
             <Route path="/" element={<ProtectedRoute><AppPage /></ProtectedRoute>} />
             <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
+            <Route path="/workflows" element={<ProtectedRoute><WorkflowsPage /></ProtectedRoute>} />
+            <Route path="/batch" element={<ProtectedRoute><BatchPage /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

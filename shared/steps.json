@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "outputRule": "Output only the resulting text, with no preamble, notes or quotation marks around it.",
+  "preserveRule": "Preserve every fact, number, name, quotation and citation exactly unless an instruction explicitly requires changing it. Do not add facts that are not in the original.",
+  "modes": {
+    "standard": {
+      "label": "Standard",
+      "prompt": "You are a professional editor. Rewrite the following text with fresh wording and varied sentence structure while keeping its meaning exactly the same."
+    },
+    "academic": {
+      "label": "Professional",
+      "prompt": "You are an editor for academic and professional writing. Rewrite the following text in a formal, polished register with precise vocabulary, clear structure and smooth transitions."
+    },
+    "aggressive": {
+      "label": "Extensive",
+      "prompt": "You are an expert editor. Substantially restructure the following text: rebuild sentences, reorder ideas where it improves flow, and choose new wording, while keeping its meaning exactly the same."
+    },
+    "simplified": {
+      "label": "Clarified",
+      "prompt": "You are a plain-language editor. Rewrite the following text in simple, plain English with short sentences and everyday vocabulary, keeping all of the same information."
+    },
+    "creative": {
+      "label": "Expressive",
+      "prompt": "You are a creative writing editor. Rewrite the following text in a fresh, engaging and vivid way while keeping its core meaning."
+    }
+  },
+  "steps": [
+    {
+      "id": "grammar",
+      "label": "Fix grammar",
+      "description": "Correct spelling, grammar and punctuation. Leaves the wording otherwise untouched.",
+      "instruction": "Correct spelling, grammar and punctuation errors. Do not otherwise change the wording."
+    },
+    {
+      "id": "clarity",
+      "label": "Improve clarity",
+      "description": "Untangle confusing sentences and make the point of each one obvious.",
+      "instruction": "Make each sentence clear and unambiguous. Untangle convoluted sentences and put the main point first."
+    },
+    {
+      "id": "simplify",
+      "label": "Simplify",
+      "description": "Plain English: shorter sentences, everyday words, no jargon.",
+      "instruction": "Rewrite in plain English: short sentences, everyday vocabulary, and no jargon unless it is essential (then explain it briefly)."
+    },
+    {
+      "id": "concise",
+      "label": "Make concise",
+      "description": "Cut filler, repetition and wordy phrasing.",
+      "instruction": "Remove filler, redundancy and wordy phrasing so the text says the same thing in fewer words."
+    },
+    {
+      "id": "expand",
+      "label": "Expand",
+      "description": "Add connecting explanation where the text is too terse.",
+      "instruction": "Expand terse passages with connecting explanation and smoother transitions. Do not invent facts, examples or statistics."
+    },
+    {
+      "id": "formal",
+      "label": "Formal tone",
+      "description": "Professional register, no slang or contractions.",
+      "instruction": "Use a formal, professional register. Avoid slang and contractions."
+    },
+    {
+      "id": "casual",
+      "label": "Casual tone",
+      "description": "Friendly and conversational, contractions welcome.",
+      "instruction": "Use a friendly, conversational register. Contractions are fine."
+    },
+    {
+      "id": "active_voice",
+      "label": "Active voice",
+      "description": "Turn passive constructions into direct, active sentences.",
+      "instruction": "Convert passive-voice sentences to active voice wherever the actor is known or obvious."
+    },
+    {
+      "id": "translate",
+      "label": "Translate",
+      "description": "Translate into another language.",
+      "instruction": "Translate the text into {lang}, keeping names, numbers and formatting intact.",
+      "params": {
+        "lang": { "label": "Language", "default": "Spanish" }
+      }
+    },
+    {
+      "id": "summarize",
+      "label": "Summarize",
+      "description": "Condense each paragraph to its key points.",
+      "instruction": "Condense the text to its key points in at most {sentences} sentences.",
+      "params": {
+        "sentences": { "label": "Max sentences", "default": "2" }
+      }
+    },
+    {
+      "id": "markdown",
+      "label": "Markdown structure",
+      "description": "Add Markdown formatting such as lists, emphasis and code spans where it helps.",
+      "instruction": "Format the text as clean Markdown: use lists for enumerations, backticks for code, file names and commands, and emphasis sparingly."
+    }
+  ],
+  "options": {
+    "length": {
+      "shorter": "Make the result noticeably shorter than the original (roughly 20 to 40 percent fewer words).",
+      "same": "",
+      "longer": "Make the result somewhat longer than the original by adding clarifying detail, without inventing facts."
+    },
+    "formality": {
+      "casual": "Use a relaxed, conversational register.",
+      "neutral": "",
+      "formal": "Use a formal register."
+    }
+  }
+}

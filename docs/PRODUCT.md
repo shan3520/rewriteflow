@@ -7,12 +7,12 @@ product
 # Product Requirements Document: RewriteFlow
 
 ## Target Audience
-General users, professionals, content creators, students, and non-native English writers who need to rephrase existing text so it reads as original. They arrive with a draft (an article, a report, an email, or a paper) and a goal: get a faithful, differently-worded version they can use with confidence. Their context is task-focused; they care that meaning is preserved and that the output is trustworthy.
+Professionals, content creators, students, and non-native English writers who want their own drafts to read better. They arrive with a draft (an article, a report, an email, a set of docs) and a goal: a clearer, better-fitting version of what they wrote, in a tone they chose, without losing anything that matters. Their context is task-focused; they care that meaning is preserved and that they can verify it.
 
 ## Core Value Proposition
-RewriteFlow is an AI text refiner that ensures originality by paraphrasing text paragraph-by-paragraph with an LLM (Llama 3.3 70B via Groq). It splits input on paragraph breaks, rewrites each chunk in a chosen style (Standard, Professional, Extensive, Clarified, Expressive), streams live progress, and stitches the result back together. Every rewrite is auto-saved to the user's history for later search and reuse. Auth is email/password via Supabase.
+RewriteFlow is an AI editor that rewrites text paragraph-by-paragraph with an LLM (Llama 3.3 70B via Groq), in a built-in style (Standard, Professional, Extensive, Clarified, Expressive) or a saved workflow of edits (fix grammar → tighten → formal → translate…), with length and tone adjustments. It streams live progress and then shows what changed: a word diff, readability before and after, and a meaning check that flags any number, name, link, citation or quote the rewrite dropped or invented. Rewrites export to .txt/.md/.docx, whole folders can be processed in batch (in the browser or with the CLI), and everything is saved to a searchable history. Auth is email/password via Supabase.
 
-Success: a user pastes text, picks a mode, and quickly gets a faithful, plagiarism-free rewrite they trust, with honest progress feedback along the way, and can find and reuse any past rewrite without friction.
+Success: a user pastes text, picks a style or workflow, and quickly gets a faithful rewrite they can verify at a glance, with honest progress feedback along the way, and can find and reuse any past rewrite or workflow without friction.
 
 ## Brand Personality
 

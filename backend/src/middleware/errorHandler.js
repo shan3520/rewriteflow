@@ -1,11 +1,14 @@
-function errorHandler(err, req, res, next) {
-    const statusCode = err.status || 500;
-    res.status(statusCode).json({
-        error: {
-            code: err.code || 'INTERNAL_ERROR',
-            message: err.message || 'An unexpected error occurred.',
-            timestamp: new Date().toISOString()
-        }
-    });
+export class HttpError extends Error {
+  constructor(status, message) {
+    super(message)
+    this.status = status
+  }
 }
-module.exports = errorHandler;
+
+// app.onError handler: known HTTP errors keep their status and message,
+// everything else is logged and reported as a generic 500.
+export function errorHandler(err, c) {
+  if (err instanceof HttpError) return c.json({ error: err.message }, err.status)
+  console.error('Unhandled error:', err)
+  return c.json({ error: 'Internal server error' }, 500)
+}

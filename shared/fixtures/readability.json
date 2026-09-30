@@ -1,0 +1,74 @@
+[
+  {
+    "text": "The cat sat on the mat. The dog ran.",
+    "expected": {
+      "words": 9,
+      "sentences": 2,
+      "syllables": 9,
+      "avgSentenceLength": 4.5,
+      "fleschReadingEase": 117.7,
+      "fleschKincaidGrade": -2,
+      "readingMinutes": 0
+    }
+  },
+  {
+    "text": "Photosynthesis converts electromagnetic radiation into chemical energy. Organisms depend on it.",
+    "expected": {
+      "words": 11,
+      "sentences": 2,
+      "syllables": 31,
+      "avgSentenceLength": 5.5,
+      "fleschReadingEase": -37.2,
+      "fleschKincaidGrade": 19.8,
+      "readingMinutes": 0
+    }
+  },
+  {
+    "text": "Hello world",
+    "expected": {
+      "words": 2,
+      "sentences": 1,
+      "syllables": 3,
+      "avgSentenceLength": 2,
+      "fleschReadingEase": 77.9,
+      "fleschKincaidGrade": 2.9,
+      "readingMinutes": 0
+    }
+  },
+  {
+    "text": "Wait! Is it done? Yes.\nNew line starts here",
+    "expected": {
+      "words": 9,
+      "sentences": 4,
+      "syllables": 9,
+      "avgSentenceLength": 2.3,
+      "fleschReadingEase": 120,
+      "fleschKincaidGrade": -2.9,
+      "readingMinutes": 0
+    }
+  },
+  {
+    "text": "It costs 3.5 dollars, doesn't it?",
+    "expected": {
+      "words": 6,
+      "sentences": 1,
+      "syllables": 7,
+      "avgSentenceLength": 6,
+      "fleschReadingEase": 102,
+      "fleschKincaidGrade": 0.5,
+      "readingMinutes": 0
+    }
+  },
+  {
+    "text": "",
+    "expected": {
+      "words": 0,
+      "sentences": 0,
+      "syllables": 0,
+      "avgSentenceLength": 0,
+      "fleschReadingEase": 0,
+      "fleschKincaidGrade": 0,
+      "readingMinutes": 0
+    }
+  }
+]

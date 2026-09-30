@@ -1,17 +1,42 @@
-import React from 'react';
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { Download } from 'lucide-react'
+import Modal from '../ui/Modal.jsx'
+import ExportStyleOptions from './ExportStyleOptions.jsx'
+import { buildExport, downloadBlob } from '../../lib/exporters.js'
 
-export default function ExportModal({ isOpen, onClose, onExport }) {
-    if (!isOpen) return null;
-    return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 text-stone-200">
-            <div className="bg-stone-900 border border-stone-800 p-6 rounded max-w-sm w-full">
-                <h3 className="font-semibold mb-4">Export Options</h3>
-                <div className="space-y-2">
-                    <button onClick={() => onExport('pdf')} className="w-full text-left px-3 py-2 bg-stone-800 rounded hover:bg-stone-700">Export as PDF</button>
-                    <button onClick={() => onExport('docx')} className="w-full text-left px-3 py-2 bg-stone-800 rounded hover:bg-stone-700">Export as DOCX</button>
-                </div>
-                <button onClick={onClose} className="mt-4 px-3 py-1 bg-stone-800 rounded text-xs">Cancel</button>
-            </div>
-        </div>
-    );
+/** Download a rewrite as .txt, .md or .docx. */
+export default function ExportModal({ open, onClose, rewritten, original, defaultName = 'rewrite', title = 'Rewrite' }) {
+  const [settings, setSettings] = useState({ format: 'docx', filename: defaultName, includeOriginal: false })
+  const [busy, setBusy] = useState(false)
+
+  async function handleExport() {
+    setBusy(true)
+    try {
+      downloadBlob(await buildExport({ ...settings, title, rewritten, original }))
+      onClose()
+    } catch (err) {
+      toast.error(err.message || "Couldn't create the file.")
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Export"
+      description="Download the rewrite to use in another app."
+      size="md"
+      footer={<>
+        <button type="button" className="btn-ghost" onClick={onClose}>Cancel</button>
+        <button type="button" className="btn-primary flex items-center gap-2" onClick={handleExport} disabled={busy}>
+          <Download size={14} /> {busy ? 'Preparing…' : 'Download'}
+        </button>
+      </>}
+    >
+      <ExportStyleOptions value={settings} onChange={setSettings} />
+    </Modal>
+  )
 }

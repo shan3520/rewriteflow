@@ -5,9 +5,17 @@ import Navbar from '../components/Navbar.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { getHistory, deleteHistoryItem } from '../lib/api.js'
 import { toast } from 'sonner'
-import { Trash2, ChevronDown, Clock, FileText, RotateCcw, Search, X, Book } from 'lucide-react'
+import { Trash2, ChevronDown, Clock, FileText, RotateCcw, Search, X, Book, Eye } from 'lucide-react'
+import HistoryTimeline from '../components/history/HistoryTimeline.jsx'
+import SnapshotRestoreModal from '../components/history/SnapshotRestoreModal.jsx'
 import { cn } from '../lib/cn.js'
 import { MODES, modeLabel } from '../lib/modes.js'
+import { modeSelection } from '../lib/selection.js'
+
+// Label for a history entry: the mode's label, or the workflow's name.
+function itemLabel(item) {
+  return item.mode === 'workflow' ? item.workflow_name || 'Workflow' : modeLabel(item.mode)
+}
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleString(undefined, {
@@ -16,7 +24,7 @@ function formatDate(dateStr) {
   })
 }
 
-const HistoryCard = memo(function HistoryCard({ item, onDelete, onReuse, index }) {
+const HistoryCard = memo(function HistoryCard({ item, onDelete, onReuse, onView, index }) {
   const [expanded, setExpanded] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirming, setConfirming] = useState(false)
@@ -74,7 +82,7 @@ const HistoryCard = memo(function HistoryCard({ item, onDelete, onReuse, index }
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-4 flex-wrap mb-3">
               <span className="label label-accent text-[10px] px-2 py-1 rounded border border-[color:var(--accent)]/25">
-                {modeLabel(item.mode)}
+                {itemLabel(item)}
               </span>
               <span className="label text-[11px] flex items-center gap-2">
                 <Clock size={12} /> {formatDate(item.created_at)}
@@ -99,6 +107,15 @@ const HistoryCard = memo(function HistoryCard({ item, onDelete, onReuse, index }
         </button>
 
         <div className="flex items-center gap-4 shrink-0 pt-1">
+          <button
+            type="button"
+            onClick={() => onView(item)}
+            aria-label="View changes, readability and meaning check"
+            title="View changes"
+            className="tap-target flex items-center justify-center rounded-md text-gray-500 hover:text-oxford dark:hover:text-oxford-soft hover:bg-gray-100 dark:hover:bg-ink-raised transition-colors border border-transparent hover:border-gray-200 dark:hover:border-ink-border"
+          >
+            <Eye size={18} />
+          </button>
           <button
             type="button"
             onClick={() => onReuse(item)}
@@ -189,6 +206,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterMode, setFilterMode] = useState('all')
+  const [viewing, setViewing] = useState(null)
   const navigate = useNavigate()
   const headingRef = useRef(null)
 
@@ -210,7 +228,9 @@ export default function HistoryPage() {
 
   const handleReuse = useCallback((item) => {
     sessionStorage.setItem('reuse_text', item.original_text)
-    sessionStorage.setItem('reuse_mode', item.mode)
+    // Workflow entries store the workflow's name, not its id, so keep the
+    // current style selection for those.
+    if (item.mode !== 'workflow') sessionStorage.setItem('reuse_selection', modeSelection(item.mode))
     navigate('/')
     toast.success('Document loaded to workspace.')
   }, [navigate])
@@ -223,6 +243,12 @@ export default function HistoryPage() {
     }
     return true
   }), [history, filterMode, searchQuery])
+
+  const filters = useMemo(() => [
+    'all',
+    ...MODES.map(m => m.value),
+    ...(history.some(item => item.mode === 'workflow') ? ['workflow'] : []),
+  ], [history])
 
   return (
     <div className="min-h-svh flex flex-col bg-paper dark:bg-ink-bg">
@@ -274,7 +300,7 @@ export default function HistoryPage() {
 
             {/* Mode filter */}
             <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-ink-surface border border-gray-200 dark:border-ink-border rounded-lg overflow-x-auto no-scrollbar">
-              {['all', ...MODES.map(m => m.value)].map((m) => (
+              {filters.map((m) => (
                 <button
                   key={m}
                   onClick={() => setFilterMode(m)}
@@ -286,7 +312,7 @@ export default function HistoryPage() {
                       : "!text-gray-600 dark:!text-gray-400 hover:!text-oxford dark:hover:!text-white"
                   )}
                 >
-                  {m === 'all' ? 'All' : modeLabel(m)}
+                  {m === 'all' ? 'All' : m === 'workflow' ? 'Workflows' : modeLabel(m)}
                 </button>
               ))}
             </div>
@@ -318,15 +344,20 @@ export default function HistoryPage() {
           </div>
         )}
 
-        {/* History cards */}
-        <div className="space-y-6">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((item, i) => (
-              <HistoryCard key={item.id} item={item} onDelete={handleDelete} onReuse={handleReuse} index={i} />
-            ))}
-          </AnimatePresence>
-        </div>
+        {/* History cards, grouped by day */}
+        <HistoryTimeline
+          items={filtered}
+          renderItem={(item, i) => (
+            <HistoryCard item={item} onDelete={handleDelete} onReuse={handleReuse} onView={setViewing} index={i} />
+          )}
+        />
       </main>
+
+      <SnapshotRestoreModal
+        snapshot={viewing && { ...viewing, title: itemLabel(viewing), filename: `rewrite-${viewing.created_at.slice(0, 10)}` }}
+        onClose={() => setViewing(null)}
+        onRestore={(item) => { setViewing(null); handleReuse(item) }}
+      />
     </div>
   )
 }

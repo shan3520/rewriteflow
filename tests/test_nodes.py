@@ -1,71 +1,37 @@
-"""Unit tests for core transformation nodes."""
+"""Meaning check: Python port must match the shared fixtures used by the frontend."""
 import unittest
+
 from engine.context import PipelineContext
-from engine.nodes.grammar import GrammarFixNode
-from engine.nodes.tone import ToneShiftNode
+from engine.nodes.hallucination import HallucinationDetectorNode, check_meaning, extract_facts
+from tests.helpers import fixture
 
-class TestTransformNodes(unittest.TestCase):
-    def test_grammar_fix_node(self):
-        node = GrammarFixNode()
-        ctx = PipelineContext("this is  a test . sentence sentence")
-        out = node.run(ctx)
-        self.assertEqual(out, "This is a test. Sentence")
 
-    def test_tone_shift_formal(self):
-        node = ToneShiftNode({"target_tone": "formal"})
-        ctx = PipelineContext("I can't help the kids buy toys.")
-        out = node.run(ctx)
-        self.assertIn("cannot", out)
-        self.assertIn("assist", out)
-        self.assertIn("children", out)
+class TestMeaningCheck(unittest.TestCase):
+    def test_shared_fixtures(self):
+        for case in fixture("meaning_check.json"):
+            with self.subTest(case["name"]):
+                self.assertEqual(check_meaning(case["original"], case["rewritten"]), case["expected"])
+
+    def test_thousands_separator(self):
+        self.assertEqual(check_meaning("We sold 1,000 units.", "We sold 1000 units.")["missing"], [])
+
+    def test_pronoun_and_sentence_start_are_not_names(self):
+        self.assertEqual(extract_facts("I think so. Yesterday I'm sure it rained."), [])
+
+    def test_number_inside_larger_number(self):
+        result = check_meaning("The fee is 5 dollars.", "The fee is 50 dollars.")
+        self.assertEqual(result["missing"], [{"type": "number", "value": "5"}])
+        self.assertEqual(result["added"], [{"type": "number", "value": "50"}])
+
+    def test_node_records_result_without_changing_text(self):
+        ctx = PipelineContext("Paid 12% to Acme Corp.")
+        ctx.text = "Paid Acme Corp."
+        HallucinationDetectorNode().run(ctx)
+        self.assertEqual(ctx.text, "Paid Acme Corp.")
+        meta = ctx.history[-1].metadata
+        self.assertFalse(meta["passed_guard"])
+        self.assertEqual(meta["meaning_check"]["missing"], [{"type": "number", "value": "12%"}])
+
 
 if __name__ == "__main__":
     unittest.main()
-
-from engine.nodes.paraphrase import ParaphraseNode
-from engine.nodes.summarize import SummarizeNode
-from engine.nodes.simplifier import SimplifierNode
-
-class TestAdvancedNodes(unittest.TestCase):
-    def test_paraphrase(self):
-        node = ParaphraseNode()
-        ctx = PipelineContext("It is important to start now.")
-        out = node.run(ctx)
-        self.assertIn("crucial", out)
-        self.assertIn("initiate", out)
-
-    def test_summarize(self):
-        node = SummarizeNode({"max_sentences": 1})
-        ctx = PipelineContext("First sentence here. Second sentence here. Third sentence here.")
-        out = node.run(ctx)
-        self.assertEqual(out, "First sentence here.")
-
-    def test_simplifier(self):
-        node = SimplifierNode()
-        ctx = PipelineContext("We will utilize this implementation subsequently.")
-        out = node.run(ctx)
-        self.assertIn("use", out)
-        self.assertIn("setup", out)
-
-from engine.nodes.vocabulary import VocabularyEnhancerNode
-from engine.nodes.seo import SEOOptimizerNode
-from engine.nodes.style import StyleTransferNode
-
-class TestPersonaAndSeoNodes(unittest.TestCase):
-    def test_vocab_enhancer(self):
-        node = VocabularyEnhancerNode()
-        ctx = PipelineContext("This is a good project.")
-        out = node.run(ctx)
-        self.assertIn("exemplary", out)
-
-    def test_seo_optimizer(self):
-        node = SEOOptimizerNode({"keywords": ["ai", "rewrite"]})
-        ctx = PipelineContext("Transforming your documentation easily.")
-        res = node.execute(ctx.text, ctx)
-        self.assertIn("meta_title", res.metadata)
-
-    def test_style_transfer(self):
-        node = StyleTransferNode({"persona": "corporate"})
-        ctx = PipelineContext("We need to meet tomorrow.")
-        out = node.run(ctx)
-        self.assertTrue(out.startswith("Per our previous discussion:"))

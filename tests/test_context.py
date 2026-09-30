@@ -1,28 +1,28 @@
-"""Unit tests for PipelineContext and PipelineRunner."""
+"""Pipeline context and runner bookkeeping."""
 import unittest
+
 from engine.context import PipelineContext
-from engine.nodes.base import BaseNode, NodeResult
+from engine.nodes.cleanup import TextCleanupNode
 from engine.runner import PipelineRunner
 
-class UpperNode(BaseNode):
-    def __init__(self):
-        super().__init__("UpperNode")
 
-    def execute(self, text: str, context: PipelineContext) -> NodeResult:
-        return NodeResult(text.upper(), {"transformed": True})
+class TestContext(unittest.TestCase):
+    def test_history_records_each_step(self):
+        ctx = PipelineRunner([TextCleanupNode(), TextCleanupNode()]).run("a  b")
+        self.assertEqual(ctx.text, "a b")
+        self.assertEqual(ctx.original_text, "a  b")
+        self.assertEqual([s.node_name for s in ctx.history], ["TextCleanupNode", "TextCleanupNode"])
+        self.assertEqual(ctx.history[0].input_text, "a  b")
+        self.assertGreaterEqual(ctx.history[0].duration_ms, 0)
+        self.assertEqual(len(ctx.logs), 4)
 
-class TestPipelineCore(unittest.TestCase):
-    def test_context_initialization(self):
-        ctx = PipelineContext("hello world")
-        self.assertEqual(ctx.text, "hello world")
-        self.assertEqual(ctx.original_text, "hello world")
+    def test_logs(self):
+        ctx = PipelineContext("x")
+        ctx.add_log("hello")
+        self.assertTrue(ctx.logs[0].endswith("hello"))
+        ctx.clear_logs()
+        self.assertEqual(ctx.logs, [])
 
-    def test_runner_execution(self):
-        runner = PipelineRunner([UpperNode()])
-        ctx = runner.run("hello world")
-        self.assertEqual(ctx.text, "HELLO WORLD")
-        self.assertEqual(len(ctx.history), 1)
-        self.assertEqual(ctx.history[0].node_name, "UpperNode")
 
 if __name__ == "__main__":
     unittest.main()

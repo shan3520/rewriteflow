@@ -1,13 +1,20 @@
-"""Unit test for verifying preset YAML workflows."""
+"""Starter workflows in presets/ are valid and shared with the web app."""
 import unittest
-import os
+
+from engine.parser import list_presets, load_workflow
+
 
 class TestPresets(unittest.TestCase):
-    def test_presets_exist(self):
-        preset_dir = r"d:\CC_Aug_6\rewriteflow\presets"
-        files = os.listdir(preset_dir)
-        self.assertIn("academic_paper.yaml", files)
-        self.assertIn("technical_doc_generator.yaml", files)
+    def test_presets_exist_and_validate(self):
+        presets = list_presets()
+        self.assertIn("email_polish", presets)
+        self.assertIn("technical_doc_generator", presets)
+        for name in presets:
+            with self.subTest(name):
+                wf = load_workflow(name)
+                self.assertTrue(wf["steps"])
+                self.assertTrue(wf["description"])
+
 
 if __name__ == "__main__":
     unittest.main()

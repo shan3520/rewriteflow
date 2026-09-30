@@ -1,1 +1,1 @@
-"""Prompts management package."""
+"""System prompt construction from the shared step library."""

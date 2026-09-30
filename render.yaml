@@ -3,9 +3,10 @@ services:
     name: rewriteai-backend
     runtime: node
     plan: free
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: node src/index.js
+    # Built from the repo root because the backend reads shared/steps.json
+    # and presets/*.yaml.
+    buildCommand: cd backend && npm ci
+    startCommand: node backend/src/index.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -19,5 +20,9 @@ services:
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "20"
+      - key: DAILY_CHAR_LIMIT
+        value: "0"
     healthCheckPath: /api/health
     autoDeploy: true

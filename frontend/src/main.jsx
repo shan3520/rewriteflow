@@ -4,12 +4,15 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
+import { PipelineProvider } from './context/PipelineContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
       <AuthProvider>
-        <App />
+        <PipelineProvider>
+          <App />
+        </PipelineProvider>
       </AuthProvider>
     </ThemeProvider>
   </StrictMode>,
