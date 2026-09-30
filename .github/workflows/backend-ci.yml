@@ -3,7 +3,7 @@ name: Backend CI
 on: [push, pull_request]
 
 jobs:
-  check:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -11,8 +11,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install and check
+      - name: Install and test
         run: |
           cd backend
           npm ci
-          node --check src/index.js
+          npm test

@@ -1,6 +1,6 @@
 # Architecture
 
-How RewriteFlow fits together end-to-end: the pieces, the request flow, and the auth/data model.
+How RewriteFlow fits together: the pieces, the request flow, and the auth/data model.
 
 ## Components
 
@@ -11,92 +11,88 @@ How RewriteFlow fits together end-to-end: the pieces, the request flow, and the 
 │  (Vercel)        │        │  (Render)         │        │                 │
 └────────┬────────┘        └────────┬─────────┘        └────────▲────────┘
          │                          │                            │
-         │  1. auth (anon key)      │  4. verify JWT             │ 5. paraphrase
+         │  1. auth (anon key)      │  2. verify JWT             │ 3. rewrite
          │  ───────────────────────┼──► (service-role key)      │    per paragraph
-         │                          │                            │
          ▼                          ▼                            │
 ┌──────────────────────────────────────────────┐               │
 │                  Supabase                       │◄──────────────┘
-│  Auth · PostgreSQL (users, rewrites) · RLS      │  6. save result
+│  Auth · Postgres (users, rewrites, workflows)   │  4. save result
 └──────────────────────────────────────────────┘
+
+┌─────────────────────────────┐
+│  shared/                     │  steps.json: modes, steps, options
+│  presets/                    │  starter workflows (YAML)
+│  shared/fixtures/            │  expected results both languages test against
+└──────────────┬──────────────┘
+      read by the backend, the Python CLI and (via /api/steps) the frontend
+
+┌─────────────────────────────┐
+│  engine/  (Python CLI)       │  same modes/workflows on local files, calls Groq directly
+└─────────────────────────────┘
 ```
 
-| Concern | Where it lives | Key client/key |
-|---------|----------------|----------------|
+| Concern | Where it lives | Key |
+|---------|----------------|-----|
 | Sign up / sign in | Frontend ↔ Supabase Auth | Supabase **anon** key (browser) |
-| Rewrite + history | Frontend ↔ Backend ↔ Supabase | Backend uses Supabase **service-role** key |
-| AI paraphrasing | Backend ↔ Groq | `GROQ_API_KEY` (server only) |
+| Rewrites, history, workflows | Frontend ↔ Backend ↔ Supabase | Backend uses the **service-role** key |
+| AI rewriting | Backend ↔ Groq, or CLI ↔ Groq | `GROQ_API_KEY` (never in the browser) |
+| Diff, meaning check, readability | Frontend only (`src/lib/`) and the CLI | none, runs locally |
 
-The browser never holds the Groq key or the service-role key. The backend is the trusted boundary.
+## One step library, three consumers
+
+`shared/steps.json` defines the five modes, the eleven workflow steps and the length/formality options. The backend builds system prompts from it (`backend/src/lib/prompts.js`), the Python CLI builds identical prompts (`engine/prompts/builder.py`), and the frontend renders the step picker from `GET /api/steps`. `shared/fixtures/prompts.json` is checked by both the backend and the CLI tests, so the two prompt builders can't drift apart. The same goes for the meaning check and readability code, which exist in JS (browser) and Python (CLI) and are both tested against `shared/fixtures/meaning_check.json` and `readability.json`.
 
 ## Authentication model
 
-1. The user signs in through the **Supabase JS client in the browser** (anon key). Supabase returns a session with an `access_token` (JWT).
-2. The frontend attaches that token to every backend request: `Authorization: Bearer <access_token>`.
-3. The backend verifies the token on each protected route via `supabase.auth.getUser(token)` and derives the `user.id` from it — the client never tells the server who it is.
-4. The backend then talks to Postgres using the **service-role** key, which bypasses RLS. Because the server scopes every query by the verified `user.id`, users only ever touch their own rows.
+1. The user signs in through the Supabase JS client in the browser (anon key) and gets a session JWT.
+2. The frontend sends it on every backend request: `Authorization: Bearer <access_token>`.
+3. `middleware/auth.js` verifies it with `supabase.auth.getUser(token)` and puts the user on the request. The client never tells the server who it is.
+4. The backend queries Postgres with the service-role key, which bypasses RLS, so **every query in `db/repository.js` is filtered by the verified user id**.
 
-**Row Level Security** (see [`../db/schema.sql`](../db/schema.sql)) is defined on `users` and `rewrites` so that *direct* access with the anon key is also restricted to `auth.uid()` — defense in depth for any future client-side queries.
+Row-level security on `users`, `rewrites` and `workflows` also restricts direct anon-key access to `auth.uid()`, as defense in depth. See [BACKEND_SECURITY.md](BACKEND_SECURITY.md).
 
 ## Rewrite request flow
 
 ```
-User clicks "Rewrite" in AppPage
+AppPage (or BatchPage) → usePipelineRunner → lib/api.js
+POST /api/rewrite { text, mode | workflowId | steps + custom_instruction, options } + Bearer token
         │
         ▼
-lib/api.js → POST /api/rewrite  { text, mode } + Bearer token
+auth → rate limiter (per user) → validate body → daily quota (optional)
         │
         ▼
-Backend: verify JWT ─► validate body (non-empty, ≤50k chars, valid mode)
+controllers/pipelineController.js: resolve the instructions
+   mode        → mode prompt
+   workflowId  → starter (presets/*.yaml) or the user's saved workflow
+   steps       → inline workflow
+   + length/formality options → one system prompt
         │
         ▼
-Split text on blank lines into paragraphs
+Split on blank lines. For each paragraph:
+   emit {type:"progress"} → Groq (retries 429 with backoff) → emit {type:"paragraph"}
         │
         ▼
-For each paragraph:
-   emit  {type:"progress", current, total}
-   call Groq (system prompt = mode) ──► up to 3 tries, exp. backoff on 429
-   emit  {type:"paragraph", text, current, total}
-   wait 500ms (rate-limit cushion)
-        │
-        ▼
-Stitch paragraphs ─► save row to `rewrites` (best-effort)
-        │
-        ▼
-emit  {type:"result", rewritten_text, word counts}  ─► stream closes
+Save to `rewrites` (best effort) → emit {type:"result"} → close
 ```
 
-The response is **ndjson** (`application/x-ndjson`, chunked). The frontend reads the stream incrementally so the user sees each paragraph and a live progress count as they complete, rather than waiting for the whole job. A client disconnect aborts processing immediately. Full event shapes are documented in [`BACKEND.md`](BACKEND.md).
+A workflow's steps are composed into **one** instruction, so a five-step workflow still costs one Groq call per paragraph. The response is ndjson, and a client disconnect aborts processing. Event shapes are in [BACKEND.md](BACKEND.md).
+
+After the result arrives, the frontend compares the original and the rewrite locally: word diff, readability before/after, and the meaning check. No extra server calls are made.
 
 ## Data model
 
 ```
-auth.users (Supabase-managed)
-     │  trigger: handle_new_user()  on INSERT
-     ▼
-public.users         id (=auth.users.id), email, created_at
-     │  1───many
-     ▼
-public.rewrites      id, user_id, original_text, rewritten_text,
-                     mode, original_word_count, rewritten_word_count, created_at
+auth.users ─(trigger)─► public.users ─1:many─► public.rewrites
+                                     └─1:many─► public.workflows
 ```
 
-- A Postgres trigger mirrors each new auth user into `public.users` automatically on signup.
-- `mode` is constrained to the five API values (`standard`, `academic`, `aggressive`, `simplified`, `creative`).
-- Deleting a user cascades to their rewrites; deleting an auth user cascades to `public.users`.
-
-## Why these choices
-
-- **Paragraph-by-paragraph streaming** keeps long documents responsive and gives honest progress feedback (a core product principle in [PRODUCT.md](PRODUCT.md)) instead of one long opaque wait.
-- **Server-side AI calls** keep API keys off the client and let the backend own retries, backoff, and rate-limit pacing.
-- **Service-role on the server + RLS on the database** gives a single trusted query path while still hardening the database against direct client access.
+Full column lists are in [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md).
 
 ## Deployment topology
 
 | Piece | Host | Config |
 |-------|------|--------|
 | Frontend | Vercel | root dir `frontend`, [`frontend/vercel.json`](../frontend/vercel.json) |
-| Backend | Render | [`render.yaml`](../render.yaml), health check `/api/health` |
-| Auth + DB | Supabase | schema from [`db/schema.sql`](../db/schema.sql) |
-
-CORS on the backend is restricted to `ALLOWED_ORIGINS` (the Vercel URL), and the frontend targets the backend via `VITE_API_BASE_URL`.
+| Backend | Render | [`render.yaml`](../render.yaml) builds from the repo root (it reads `shared/` and `presets/`), health check `/api/health` |
+| Auth + DB | Supabase | [`db/schema.sql`](../db/schema.sql), plus [`db/migrations/`](../db/migrations) for existing databases |
+| CLI | your machine | `pip install -r requirements.txt`, see [CLI_GUIDE.md](CLI_GUIDE.md) |
