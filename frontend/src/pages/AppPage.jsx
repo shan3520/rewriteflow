@@ -1,16 +1,23 @@
-import { useState, useRef, useEffect, useId, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import Navbar from '../components/Navbar.jsx'
-import { useAuth } from '../context/AuthContext.jsx'
-import { rewriteText } from '../lib/api.js'
 import { toast } from 'sonner'
-import { Copy, Check, ChevronDown, RotateCcw, BookOpen } from 'lucide-react'
-import { cn } from '../lib/cn.js'
-import { MODES } from '../lib/modes.js'
+import { Copy, Check, RotateCcw, BookOpen, Square, Command } from 'lucide-react'
+import Navbar from '../components/Navbar.jsx'
 import SideBySideDiff from '../components/diff/SideBySideDiff.jsx'
+import ExportControls from '../components/diff/ExportControls.jsx'
 import PreviewToggle from '../components/controls/PreviewToggle.jsx'
+import StylePicker from '../components/controls/StylePicker.jsx'
+import ToneSliders from '../components/controls/ToneSliders.jsx'
 import StatsBar from '../components/stats/StatsBar.jsx'
 import MeaningCheckPanel from '../components/stats/MeaningCheckPanel.jsx'
+import CommandPalette from '../components/palette/CommandPalette.jsx'
+import { usePipelineRunner } from '../hooks/usePipelineRunner.js'
+import { useStyleChoices } from '../hooks/useStyleChoices.js'
+import { useKeyboardShortcuts, modKey } from '../hooks/useKeyboardShortcuts.js'
+import { useTheme } from '../context/ThemeContext.jsx'
+import { DEFAULT_ADJUSTMENTS, DEFAULT_SELECTION, modeSelection, selectionToRequest } from '../lib/selection.js'
+import { MODES } from '../lib/modes.js'
 
 const MAX_CHARS = 50_000
 
@@ -18,32 +25,28 @@ function countWords(text) {
   return text.trim() ? text.trim().split(/\s+/).length : 0
 }
 
+function initialSelection() {
+  const saved = sessionStorage.getItem('reuse_selection')
+  if (saved) return saved
+  const reuseMode = sessionStorage.getItem('reuse_mode')
+  return reuseMode && MODES.some(m => m.value === reuseMode) ? modeSelection(reuseMode) : DEFAULT_SELECTION
+}
+
 export default function AppPage() {
-  const { session } = useAuth()
+  const navigate = useNavigate()
+  const { toggle: toggleTheme } = useTheme()
+  const runner = usePipelineRunner()
+  const choices = useStyleChoices()
   const [inputText, setInputText] = useState(() => sessionStorage.getItem('reuse_text') || '')
-  const [outputText, setOutputText] = useState('')
-  const [mode, setMode] = useState(() => {
-    const reuseMode = sessionStorage.getItem('reuse_mode')
-    return reuseMode && MODES.some(m => m.value === reuseMode) ? reuseMode : 'standard'
-  })
-  const [modeOpen, setModeOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [progress, setProgress] = useState({ current: 0, total: 0 })
+  const [selection, setSelection] = useState(initialSelection)
+  const [adjustments, setAdjustments] = useState(DEFAULT_ADJUSTMENTS)
   const [copied, setCopied] = useState(false)
-  // The input as it was when the last rewrite finished, so the review tools
-  // compare against what was actually sent even if the draft is edited later.
-  const [sourceText, setSourceText] = useState('')
-  const [done, setDone] = useState(false)
   const [view, setView] = useState('clean')
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
 
-  const abortControllerRef = useRef(null)
-  const triggerRef = useRef(null)
-  const optionRefs = useRef([])
-  const listboxId = useId()
-
-  const selectedMode = MODES.find(m => m.value === mode)
-  const SelectedIcon = selectedMode.Icon
-  const modeIndex = MODES.findIndex(m => m.value === mode)
+  const { loading, done, output: outputText, source: sourceText, progress } = runner
+  const selected = choices.find(c => c.key === selection)
 
   useEffect(() => { document.title = 'RewriteFlow · AI Text Refinement' }, [])
 
@@ -55,95 +58,26 @@ export default function AppPage() {
     node.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'end' })
   }, [loading])
 
-  useEffect(() => {
-    if (!modeOpen) return
-    const handler = () => setModeOpen(false)
-    window.addEventListener('click', handler)
-    return () => window.removeEventListener('click', handler)
-  }, [modeOpen])
-
-  function selectMode(value) {
-    setMode(value)
-    setModeOpen(false)
-    triggerRef.current?.focus()
-  }
-
-  // When the listbox opens, move focus to the selected option so arrow keys
-  // and Escape work without a hunt for the menu.
-  useEffect(() => {
-    if (!modeOpen) return
-    const i = Math.max(0, modeIndex)
-    const raf = requestAnimationFrame(() => optionRefs.current[i]?.focus())
-    return () => cancelAnimationFrame(raf)
-  }, [modeOpen, modeIndex])
-
-  function handleTriggerKeyDown(e) {
-    if (!modeOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
-      e.preventDefault()
-      setModeOpen(true)
-    }
-  }
-
-  function handleListKeyDown(e) {
-    const count = MODES.length
-    const current = optionRefs.current.findIndex(el => el === document.activeElement)
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      setModeOpen(false)
-      triggerRef.current?.focus()
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      optionRefs.current[current < 0 ? 0 : (current + 1) % count]?.focus()
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      optionRefs.current[current < 0 ? count - 1 : (current - 1 + count) % count]?.focus()
-    } else if (e.key === 'Home') {
-      e.preventDefault()
-      optionRefs.current[0]?.focus()
-    } else if (e.key === 'End') {
-      e.preventDefault()
-      optionRefs.current[count - 1]?.focus()
-    } else if (e.key === 'Tab') {
-      // Close and hand focus back to the trigger so the next Tab proceeds in
-      // normal order instead of dropping to <body> as the options unmount.
-      e.preventDefault()
-      setModeOpen(false)
-      triggerRef.current?.focus()
-    }
+  function chooseStyle(key) {
+    setSelection(key)
+    sessionStorage.setItem('reuse_selection', key)
   }
 
   async function handleRewrite() {
+    if (loading) return
     if (!inputText.trim()) return toast.error('Please provide a document to refine.')
-    abortControllerRef.current?.abort()
-
-    const controller = new AbortController()
-    abortControllerRef.current = controller
-
-    const source = inputText
-    setLoading(true)
-    setDone(false)
-    setOutputText('')
-    setProgress({ current: 0, total: 0 })
-
+    if (!selected) return toast.error('That workflow is no longer available. Pick another style.')
     try {
-      const result = await rewriteText(
-        session,
-        inputText,
-        mode,
-        (current, total) => setProgress({ current, total }),
-        (paragraph) => setOutputText(prev => prev + (prev ? '\n\n' : '') + paragraph),
-        { signal: controller.signal }
-      )
-      setOutputText(result.rewritten_text)
-      setSourceText(source)
-      setDone(true)
+      await runner.run({ text: inputText, ...selectionToRequest(selection), options: adjustments })
     } catch (err) {
-      if (err.name === 'AbortError') return
-      toast.error(err.message || "The refinement process encountered an error.")
-    } finally {
-      setLoading(false)
-      setProgress({ current: 0, total: 0 })
+      toast.error(err.message || 'The refinement process encountered an error.')
     }
+  }
+
+  function handleReset() {
+    runner.reset()
+    setInputText('')
+    setView('clean')
   }
 
   async function handleCopy() {
@@ -156,6 +90,27 @@ export default function AppPage() {
       toast.error('Unable to access clipboard.')
     }
   }
+
+  useKeyboardShortcuts({
+    'mod+enter': handleRewrite,
+    'mod+k': () => setPaletteOpen(o => !o),
+  })
+
+  const commands = [
+    { id: 'rewrite', group: 'Actions', label: 'Rewrite text', hint: `${modKey} Enter`, disabled: loading || !inputText.trim(), run: handleRewrite },
+    { id: 'stop', group: 'Actions', label: 'Stop rewriting', disabled: !loading, run: runner.cancel },
+    { id: 'copy', group: 'Actions', label: 'Copy rewrite', disabled: !outputText, run: handleCopy },
+    { id: 'export', group: 'Actions', label: 'Export rewrite…', disabled: !done, run: () => setExportOpen(true) },
+    { id: 'view', group: 'Actions', label: view === 'changes' ? 'Show clean rewrite' : 'Show changes', disabled: !done, run: () => setView(v => (v === 'changes' ? 'clean' : 'changes')) },
+    { id: 'reset', group: 'Actions', label: 'Clear the workspace', disabled: !inputText && !outputText, run: handleReset },
+    ...choices.map(c => ({ id: `style-${c.key}`, group: c.group, label: `Use: ${c.label}`, keywords: 'style mode workflow', run: () => chooseStyle(c.key) })),
+    ...['shorter', 'same', 'longer'].map(v => ({ id: `length-${v}`, group: 'Adjust', label: `Length: ${v}`, run: () => setAdjustments(a => ({ ...a, length: v })) })),
+    ...['casual', 'neutral', 'formal'].map(v => ({ id: `tone-${v}`, group: 'Adjust', label: `Tone: ${v}`, run: () => setAdjustments(a => ({ ...a, formality: v })) })),
+    { id: 'go-workflows', group: 'Go to', label: 'Workflows', run: () => navigate('/workflows') },
+    { id: 'go-batch', group: 'Go to', label: 'Batch', run: () => navigate('/batch') },
+    { id: 'go-history', group: 'Go to', label: 'History', run: () => navigate('/history') },
+    { id: 'theme', group: 'Settings', label: 'Toggle dark mode', run: toggleTheme },
+  ]
 
   const progressPct = progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0
   const inputWordCount = useMemo(() => countWords(inputText), [inputText])
@@ -175,13 +130,21 @@ export default function AppPage() {
         </div>
         {/* Header */}
         <div className="mb-16 border-b border-gray-300 dark:border-ink-border pb-12">
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center justify-between gap-4 mb-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-display italic text-oxford dark:text-white">
               RewriteFlow
             </h1>
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              className="btn-ghost hidden sm:flex items-center gap-2 border border-gray-300 dark:border-ink-border"
+              aria-label="Open command palette"
+            >
+              <Command size={13} /> {modKey} K
+            </button>
           </div>
           <p className="text-xl text-gray-700 dark:text-gray-300 max-w-[60ch] leading-relaxed">
-            Paste a draft, choose a style, and get a faithful rewrite paragraph by paragraph. The text stays yours; only the wording changes.
+            Paste a draft, choose a style or workflow, and get a faithful rewrite paragraph by paragraph. Then check what changed before you use it.
           </p>
         </div>
 
@@ -207,7 +170,7 @@ export default function AppPage() {
 
           {/* Right: Rewritten */}
           <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between px-1">
+            <div className="flex items-center justify-between gap-3 px-1 flex-wrap">
               <span className="label label-accent text-[11px]">Refined output</span>
               <div className="flex items-center gap-5">
                 {done && <PreviewToggle value={view} onChange={setView} />}
@@ -220,6 +183,15 @@ export default function AppPage() {
                     {copied ? <Check size={12} /> : <Copy size={12} />}
                     {copied ? 'Copied' : 'Copy'}
                   </button>
+                )}
+                {done && (
+                  <ExportControls
+                    rewritten={outputText}
+                    original={sourceText}
+                    title={selected ? `Rewrite · ${selected.label}` : 'Rewrite'}
+                    open={exportOpen}
+                    onOpenChange={setExportOpen}
+                  />
                 )}
               </div>
             </div>
@@ -262,121 +234,51 @@ export default function AppPage() {
                     className="mb-7 last:mb-0"
                   >{para}</motion.p>
                 ))}
+                {runner.status === 'cancelled' && (
+                  <p className="label label-muted text-[10px] mt-6">Stopped. The paragraphs above were finished before you stopped.</p>
+                )}
               </div>
             </div>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pt-12 border-t border-gray-300 dark:border-ink-border">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-5 w-full md:w-auto">
-            {/* Mode selector */}
-            <div className="relative" onClick={e => e.stopPropagation()}>
-              <button
-                ref={triggerRef}
-                onClick={() => setModeOpen(o => !o)}
-                onKeyDown={handleTriggerKeyDown}
-                aria-haspopup="listbox"
-                aria-controls={modeOpen ? listboxId : undefined}
-                aria-expanded={modeOpen}
-                aria-label={`Rewrite style: ${selectedMode.label}`}
-                className="bezel-inner flex items-center gap-4 px-5 py-3.5 w-full sm:min-w-[240px] justify-between hover:border-[color:var(--accent)] transition-colors"
-              >
-                <span className="flex items-center gap-3 label text-xs text-[color:var(--accent)]">
-                  <SelectedIcon size={16} />
-                  {selectedMode.label}
-                </span>
-                <ChevronDown size={14} className={cn('text-gray-500 transition-transform duration-200', modeOpen && 'rotate-180')} />
-              </button>
-
-              <AnimatePresence>
-                {modeOpen && (
-                  <motion.ul
-                    id={listboxId}
-                    role="listbox"
-                    aria-label="Rewrite style"
-                    onKeyDown={handleListKeyDown}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
-                    transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute bottom-full mb-3 left-0 w-full sm:w-80 bezel z-dropdown"
-                  >
-                    {MODES.map((m, i) => (
-                      <li key={m.value} role="presentation">
-                        <button
-                          ref={el => { optionRefs.current[i] = el }}
-                          role="option"
-                          aria-selected={mode === m.value}
-                          onClick={() => selectMode(m.value)}
-                          className={cn(
-                            'w-full text-left px-6 py-4 rounded-md transition-colors',
-                            mode === m.value ? 'bg-gray-100 dark:bg-ink-raised' : 'hover:bg-gray-50 dark:hover:bg-ink-raised/60',
-                          )}
-                        >
-                          <div className="flex items-center gap-4">
-                            <m.Icon size={18} className={mode === m.value ? 'text-oxford dark:text-oxford-soft' : 'text-gray-500'} />
-                            <div>
-                              <div className={cn('label text-xs', mode === m.value && 'label-accent')}>{m.label}</div>
-                              <div className="text-sm font-serif text-gray-600 dark:text-gray-400 mt-0.5">{m.desc}</div>
-                            </div>
-                          </div>
-                        </button>
-                      </li>
-                    ))}
-                  </motion.ul>
-                )}
-              </AnimatePresence>
+        <div className="flex flex-col gap-8 pt-12 border-t border-gray-300 dark:border-ink-border">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5 w-full md:w-auto">
+              <StylePicker value={selection} onChange={chooseStyle} choices={choices} disabled={loading} />
+              {loading ? (
+                <button onClick={runner.cancel} className="btn-primary w-full sm:w-auto sm:min-w-[190px] flex items-center justify-center gap-2">
+                  <Square size={12} fill="currentColor" /> Stop
+                </button>
+              ) : (
+                <button
+                  onClick={handleRewrite}
+                  disabled={!inputText.trim()}
+                  className="btn-primary w-full sm:w-auto sm:min-w-[190px]"
+                  title={`${modKey}+Enter`}
+                >
+                  Rewrite text
+                </button>
+              )}
             </div>
 
-            <button
-              onClick={handleRewrite}
-              disabled={loading || !inputText.trim()}
-              className="btn-primary w-full sm:w-auto sm:min-w-[190px]"
-            >
-              {loading ? 'Rewriting…' : 'Rewrite text'}
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between md:justify-end gap-8">
-            {(inputText || outputText) && (
-              <button
-                onClick={() => {
-                  abortControllerRef.current?.abort()
-                  setInputText('')
-                  setOutputText('')
-                  setProgress({ current: 0, total: 0 })
-                  setLoading(false)
-                  setDone(false)
-                }}
-                className="label text-[10px] flex items-center gap-2 tap-target text-gray-600 dark:text-gray-400 hover:!text-red-700 dark:hover:!text-red-400 transition-colors"
-              >
-                <RotateCcw size={12} /> Reset
-              </button>
-            )}
-            <div className="label label-muted text-[10px]">
-              {inputText.length.toLocaleString()} / {MAX_CHARS.toLocaleString()} chars
+            <div className="flex items-center justify-between md:justify-end gap-8">
+              {(inputText || outputText) && (
+                <button
+                  onClick={handleReset}
+                  className="label text-[10px] flex items-center gap-2 tap-target text-gray-600 dark:text-gray-400 hover:!text-red-700 dark:hover:!text-red-400 transition-colors"
+                >
+                  <RotateCcw size={12} /> Reset
+                </button>
+              )}
+              <div className="label label-muted text-[10px]">
+                {inputText.length.toLocaleString()} / {MAX_CHARS.toLocaleString()} chars
+              </div>
             </div>
           </div>
+          <ToneSliders value={adjustments} onChange={setAdjustments} disabled={loading} />
         </div>
-
-        {/* Review: readability and meaning check for the finished rewrite */}
-        {done && !loading && (
-          <section aria-labelledby="review-heading" className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10">
-            <div className="bezel">
-              <div className="bezel-inner p-7">
-                <h2 id="review-heading" className="label text-[11px] mb-5">Readability</h2>
-                <StatsBar originalText={sourceText} rewrittenText={outputText} />
-              </div>
-            </div>
-            <div className="bezel">
-              <div className="bezel-inner p-7">
-                <h2 className="label text-[11px] mb-5">Meaning check</h2>
-                <MeaningCheckPanel originalText={sourceText} rewrittenText={outputText} />
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* Progress bar */}
         <AnimatePresence>
@@ -415,7 +317,31 @@ export default function AppPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Review: readability and meaning check for the finished rewrite */}
+        {done && (
+          <section aria-labelledby="review-heading" className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="bezel">
+              <div className="bezel-inner p-7">
+                <h2 id="review-heading" className="label text-[11px] mb-5">Readability</h2>
+                <StatsBar originalText={sourceText} rewrittenText={outputText} />
+              </div>
+            </div>
+            <div className="bezel">
+              <div className="bezel-inner p-7">
+                <h2 className="label text-[11px] mb-5">Meaning check</h2>
+                <MeaningCheckPanel originalText={sourceText} rewrittenText={outputText} />
+              </div>
+            </div>
+          </section>
+        )}
+
+        <p className="label label-muted text-[10px] mt-12 hidden sm:block">
+          {modKey}+Enter to rewrite · {modKey}+K for commands
+        </p>
       </main>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
     </div>
   )
 }

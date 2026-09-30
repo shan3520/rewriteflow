@@ -15,3 +15,15 @@ if (!window.matchMedia) {
     removeEventListener() {},
   })
 }
+
+// jsdom's Blob lacks text()/arrayBuffer(); browsers have both.
+function readBlob(blob, method) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(reader.error)
+    reader[method](blob)
+  })
+}
+if (!Blob.prototype.text) Blob.prototype.text = function text() { return readBlob(this, 'readAsText') }
+if (!Blob.prototype.arrayBuffer) Blob.prototype.arrayBuffer = function arrayBuffer() { return readBlob(this, 'readAsArrayBuffer') }

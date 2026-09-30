@@ -1,4 +1,4 @@
-import { diffWordsWithSpace } from 'diff'
+import { diffWords } from 'diff'
 
 const splitParagraphs = (text) => text.split(/\n\n+/).map(p => p.trim()).filter(Boolean)
 
@@ -13,9 +13,9 @@ export function diffParagraphs(original, rewritten) {
   const a = splitParagraphs(original)
   const b = splitParagraphs(rewritten)
   if (a.length === b.length) {
-    return a.map((p, i) => toParts(diffWordsWithSpace(p, b[i])))
+    return a.map((p, i) => toParts(diffWords(p, b[i])))
   }
-  return [toParts(diffWordsWithSpace(a.join('\n\n'), b.join('\n\n')))]
+  return [toParts(diffWords(a.join('\n\n'), b.join('\n\n')))]
 }
 
 const countWords = (s) => (s.match(/\S+/g) || []).length

@@ -6,7 +6,7 @@ import { PenLine, GraduationCap, Shuffle, Feather, BookOpen } from 'lucide-react
 export const MODES = [
   { value: 'standard', label: 'Standard', desc: 'Preserves the original document meaning', Icon: BookOpen },
   { value: 'academic', label: 'Professional', desc: 'Formal tone and polished structure', Icon: GraduationCap },
-  { value: 'aggressive', label: 'Extensive', desc: 'Maximum restructuring for originality', Icon: Shuffle },
+  { value: 'aggressive', label: 'Extensive', desc: 'Rebuilds sentences and reorders ideas for flow', Icon: Shuffle },
   { value: 'simplified', label: 'Clarified', desc: 'Plain English for maximum readability', Icon: Feather },
   { value: 'creative', label: 'Expressive', desc: 'A more literary and engaging approach', Icon: PenLine },
 ]

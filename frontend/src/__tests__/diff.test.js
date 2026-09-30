@@ -10,6 +10,11 @@ describe('diffParagraphs', () => {
     expect(result[1].every(p => p.type === 'same')).toBe(true)
   })
 
+  it('keeps shared phrases when a sentence is reordered', () => {
+    const [parts] = diffParagraphs('Sales rose 12% in 2024 thanks to Acme Corp.', 'Thanks to Acme Corp, sales increased in 2024.')
+    expect(parts.filter(p => p.type === 'same').map(p => p.value.trim())).toContain('to Acme Corp')
+  })
+
   it('falls back to one block when paragraph counts differ', () => {
     expect(diffParagraphs('A.\n\nB.', 'A and B.')).toHaveLength(1)
   })

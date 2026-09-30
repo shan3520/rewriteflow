@@ -1,9 +1,11 @@
-import React from 'react';
+import { ArrowDown } from 'lucide-react'
 
-export default function ConnectionLines({ nodes, edges }) {
-    return (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none stroke-amber-500/50" strokeWidth="2">
-            <line x1="50" y1="50" x2="200" y2="50" strokeDasharray="4" />
-        </svg>
-    );
+// Decorative connector drawn between two steps in the chain.
+export default function ConnectionLines() {
+  return (
+    <div className="flex flex-col items-center py-1 text-gray-400 dark:text-gray-600" aria-hidden="true">
+      <span className="block w-px h-3 bg-current" />
+      <ArrowDown size={14} />
+    </div>
+  )
 }

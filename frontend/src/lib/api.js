@@ -25,7 +25,7 @@ async function getAuthHeader(session) {
 }
 
 // Run a fetch, turning a dropped/blocked connection into a readable message.
-async function request(url, options) {
+async function apiFetch(url, options) {
   try {
     return await fetch(url, options)
   } catch (err) {
@@ -37,6 +37,14 @@ async function request(url, options) {
 // Build an Error from a non-OK response, preferring the server's message
 // and falling back to a status-appropriate one.
 async function describeError(response) {
+  const error = await describeErrorMessage(response)
+  error.status = response.status
+  const retryAfter = Number(response.headers?.get?.('Retry-After'))
+  if (retryAfter > 0) error.retryAfter = retryAfter
+  return error
+}
+
+async function describeErrorMessage(response) {
   let serverMessage = ''
   try {
     const data = await response.json()
@@ -59,13 +67,19 @@ async function describeError(response) {
   return new Error(serverMessage || `Request failed (${response.status}).`)
 }
 
-export async function rewriteText(session, text, mode, onProgress, onParagraph, options = {}) {
+/**
+ * Rewrite `text` using exactly one instruction source:
+ *   { mode } | { workflowId } | { steps, custom_instruction }
+ * plus optional `options` ({ length, formality }). Streams ndjson and calls
+ * onProgress(current, total) / onParagraph(text) as paragraphs finish.
+ */
+export async function rewriteText(session, request, { onProgress, onParagraph, signal } = {}) {
   const headers = await getAuthHeader(session)
-  const response = await request(`${API_BASE}/api/rewrite`, {
+  const response = await apiFetch(`${API_BASE}/api/rewrite`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ text, mode }),
-    signal: options.signal,
+    body: JSON.stringify(request),
+    signal,
   })
 
   if (!response.ok) {
@@ -113,17 +127,60 @@ export async function rewriteText(session, text, mode, onProgress, onParagraph, 
 
 export async function getHistory(session) {
   const headers = await getAuthHeader(session)
-  const response = await request(`${API_BASE}/api/history`, { headers })
+  const response = await apiFetch(`${API_BASE}/api/history`, { headers })
   if (!response.ok) throw await describeError(response)
   return response.json()
 }
 
 export async function deleteHistoryItem(session, id) {
   const headers = await getAuthHeader(session)
-  const response = await request(`${API_BASE}/api/history/${id}`, {
+  const response = await apiFetch(`${API_BASE}/api/history/${id}`, {
     method: 'DELETE',
     headers,
   })
   if (!response.ok) throw await describeError(response)
   return response.json()
+}
+
+async function json(response) {
+  if (!response.ok) throw await describeError(response)
+  return response.json()
+}
+
+// Step library, mode labels and option choices. Public.
+export async function getSteps() {
+  return json(await apiFetch(`${API_BASE}/api/steps`))
+}
+
+// Built-in starter workflows (presets/*.yaml). Public.
+export async function getStarterWorkflows() {
+  return (await json(await apiFetch(`${API_BASE}/api/workflows/starters`))).workflows
+}
+
+export async function listWorkflows(session) {
+  const headers = await getAuthHeader(session)
+  return (await json(await apiFetch(`${API_BASE}/api/workflows`, { headers }))).workflows
+}
+
+export async function createWorkflow(session, workflow) {
+  const headers = await getAuthHeader(session)
+  return (await json(await apiFetch(`${API_BASE}/api/workflows`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(workflow),
+  }))).workflow
+}
+
+export async function updateWorkflow(session, id, workflow) {
+  const headers = await getAuthHeader(session)
+  return (await json(await apiFetch(`${API_BASE}/api/workflows/${id}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(workflow),
+  }))).workflow
+}
+
+export async function deleteWorkflow(session, id) {
+  const headers = await getAuthHeader(session)
+  return json(await apiFetch(`${API_BASE}/api/workflows/${id}`, { method: 'DELETE', headers }))
 }

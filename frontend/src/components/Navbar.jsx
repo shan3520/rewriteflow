@@ -3,13 +3,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { toast } from 'sonner'
-import { PenTool, Clock, LogOut, Menu, X } from 'lucide-react'
+import { PenTool, Clock, LogOut, Menu, X, Workflow, Files } from 'lucide-react'
 import Logo from './ui/Logo'
 import ThemeToggle from './ui/ThemeToggle'
 import { cn } from '../lib/cn'
 
 const navLinks = [
   { to: '/', label: 'Workspace', Icon: PenTool },
+  { to: '/workflows', label: 'Workflows', Icon: Workflow },
+  { to: '/batch', label: 'Batch', Icon: Files },
   { to: '/history', label: 'History', Icon: Clock },
 ]
 
