@@ -1,10 +1,7 @@
 name: Academic Paper Polish
-version: 1.0
-nodes:
-  - type: GrammarFixNode
-  - type: ToneShiftNode
-    config:
-      target_tone: formal
-  - type: StyleTransferNode
-    config:
-      persona: academic
+description: Formal, clear prose for papers and reports. Keeps every citation intact.
+steps:
+  - grammar
+  - clarity
+  - formal
+custom_instruction: Keep discipline-specific terminology and all in-text citations exactly as written.

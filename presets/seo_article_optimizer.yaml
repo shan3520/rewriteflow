@@ -1,7 +1,7 @@
-name: SEO Article Optimizer
-version: 1.0
-nodes:
-  - type: ParaphraseNode
-  - type: SEOOptimizerNode
-    config:
-      keywords: ["content rewriter", "ai workflow"]
+name: Web Article Readability
+description: Scannable web copy with plain language and short sentences.
+steps:
+  - clarity
+  - simplify
+  - active_voice
+custom_instruction: Keep every product name and keyword that appears in the original.

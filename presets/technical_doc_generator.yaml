@@ -1,6 +1,8 @@
-name: Technical Doc Generator
-version: 1.0
-nodes:
-  - type: CodeCommenterNode
-  - type: MarkdownFormattingNode
-  - type: SimplifierNode
+name: Technical Docs Polish
+description: Precise, active-voice documentation with Markdown structure.
+steps:
+  - grammar
+  - clarity
+  - active_voice
+  - markdown
+custom_instruction: Never change code, commands, flags, file paths or version numbers.

@@ -1,8 +1,7 @@
-name: Blog Post Rewrite Pipeline
-version: 1.0
-nodes:
-  - type: ParaphraseNode
-  - type: SEOOptimizerNode
-    config:
-      keywords: ["text rewriter", "ai engine"]
-  - type: SimplifierNode
+name: Blog Post Rewrite
+description: Friendly, readable blog prose with tighter paragraphs.
+steps:
+  - grammar
+  - concise
+  - casual
+custom_instruction: Open paragraphs with the most interesting point and vary sentence length.

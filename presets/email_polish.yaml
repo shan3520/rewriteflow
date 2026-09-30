@@ -1,8 +1,7 @@
-name: Email Polish Pipeline
-version: 1.0
-nodes:
-  - type: GrammarFixNode
-  - type: ToneShiftNode
-    config:
-      target_tone: formal
-  - type: VocabularyEnhancerNode
+name: Email Polish
+description: Turns a rough draft into a short, professional email.
+steps:
+  - grammar
+  - concise
+  - formal
+custom_instruction: Keep it courteous and make any request or deadline explicit.
