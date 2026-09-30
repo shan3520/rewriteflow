@@ -1,0 +1,132 @@
+[
+  {
+    "name": "faithful rewrite keeps every detail",
+    "original": "Revenue grew 12% to $4.5 million in 2023, according to Jane Doe of Acme Corp.",
+    "rewritten": "According to Jane Doe at Acme Corp, revenue rose 12% to $4.5 million in 2023.",
+    "expected": {
+      "checked": 5,
+      "missing": [],
+      "added": []
+    }
+  },
+  {
+    "name": "lossy rewrite drops and invents details",
+    "original": "Revenue grew 12% to $4.5 million in 2023, according to Jane Doe of Acme Corp.",
+    "rewritten": "Revenue grew sharply to about $5 million, according to Acme.",
+    "expected": {
+      "checked": 5,
+      "missing": [
+        {
+          "type": "number",
+          "value": "12%"
+        },
+        {
+          "type": "number",
+          "value": "4.5"
+        },
+        {
+          "type": "number",
+          "value": "2023"
+        },
+        {
+          "type": "name",
+          "value": "Jane Doe"
+        },
+        {
+          "type": "name",
+          "value": "Acme Corp"
+        }
+      ],
+      "added": [
+        {
+          "type": "number",
+          "value": "5"
+        }
+      ]
+    }
+  },
+  {
+    "name": "citations, links and thousands separators",
+    "original": "Prior work (Smith et al., 2020) and [3] found 1,000 cases. See https://example.com/report.",
+    "rewritten": "Earlier studies (Smith et al., 2020) found 1000 cases, see https://example.com/report.",
+    "expected": {
+      "checked": 4,
+      "missing": [
+        {
+          "type": "citation",
+          "value": "[3]"
+        }
+      ],
+      "added": []
+    }
+  },
+  {
+    "name": "quotes and emails",
+    "original": "She said \"we will ship on Friday\" and emailed ops@example.com.",
+    "rewritten": "She promised to ship by Friday and emailed the team.",
+    "expected": {
+      "checked": 2,
+      "missing": [
+        {
+          "type": "email",
+          "value": "ops@example.com"
+        },
+        {
+          "type": "quote",
+          "value": "we will ship on Friday"
+        }
+      ],
+      "added": []
+    }
+  },
+  {
+    "name": "sentence-start words are not names; multi-word names",
+    "original": "The meeting is in Paris. Then we fly to New York City on May 5.",
+    "rewritten": "We meet in Paris, then fly to New York on 5 May, joined by Microsoft.",
+    "expected": {
+      "checked": 4,
+      "missing": [
+        {
+          "type": "name",
+          "value": "New York City"
+        }
+      ],
+      "added": [
+        {
+          "type": "name",
+          "value": "Microsoft"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ranges, hyphenated names and possessives",
+    "original": "I think COVID-19 cases fell in 2020-2021. Google's report on pages 10-12 agrees.",
+    "rewritten": "Cases of COVID-19 dropped in 2020-2021, and the Google report on pages 10-12 agrees.",
+    "expected": {
+      "checked": 5,
+      "missing": [],
+      "added": []
+    }
+  },
+  {
+    "name": "curly quotes match straight quotes",
+    "original": "He wrote “ship it today” in the chat.",
+    "rewritten": "In the chat he wrote \"ship it today\".",
+    "expected": {
+      "checked": 1,
+      "missing": [],
+      "added": []
+    }
+  },
+  {
+    "name": "empty text",
+    "original": "",
+    "rewritten": "",
+    "expected": {
+      "checked": 0,
+      "missing": [],
+      "added": []
+    }
+  }
+]

@@ -7,6 +7,10 @@ import { toast } from 'sonner'
 import { Copy, Check, ChevronDown, RotateCcw, BookOpen } from 'lucide-react'
 import { cn } from '../lib/cn.js'
 import { MODES } from '../lib/modes.js'
+import SideBySideDiff from '../components/diff/SideBySideDiff.jsx'
+import PreviewToggle from '../components/controls/PreviewToggle.jsx'
+import StatsBar from '../components/stats/StatsBar.jsx'
+import MeaningCheckPanel from '../components/stats/MeaningCheckPanel.jsx'
 
 const MAX_CHARS = 50_000
 
@@ -26,6 +30,11 @@ export default function AppPage() {
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
   const [copied, setCopied] = useState(false)
+  // The input as it was when the last rewrite finished, so the review tools
+  // compare against what was actually sent even if the draft is edited later.
+  const [sourceText, setSourceText] = useState('')
+  const [done, setDone] = useState(false)
+  const [view, setView] = useState('clean')
 
   const abortControllerRef = useRef(null)
   const triggerRef = useRef(null)
@@ -110,7 +119,9 @@ export default function AppPage() {
     const controller = new AbortController()
     abortControllerRef.current = controller
 
+    const source = inputText
     setLoading(true)
+    setDone(false)
     setOutputText('')
     setProgress({ current: 0, total: 0 })
 
@@ -124,6 +135,8 @@ export default function AppPage() {
         { signal: controller.signal }
       )
       setOutputText(result.rewritten_text)
+      setSourceText(source)
+      setDone(true)
     } catch (err) {
       if (err.name === 'AbortError') return
       toast.error(err.message || "The refinement process encountered an error.")
@@ -197,6 +210,7 @@ export default function AppPage() {
             <div className="flex items-center justify-between px-1">
               <span className="label label-accent text-[11px]">Refined output</span>
               <div className="flex items-center gap-5">
+                {done && <PreviewToggle value={view} onChange={setView} />}
                 <span className="label label-muted text-[11px]">{outputWordCount.toLocaleString()} words</span>
                 {outputText && (
                   <button
@@ -236,7 +250,9 @@ export default function AppPage() {
                     </div>
                   )}
                 </AnimatePresence>
-                {outputParagraphs.map((para, i) => (
+                {done && view === 'changes' ? (
+                  <SideBySideDiff originalText={sourceText} rewrittenText={outputText} />
+                ) : outputParagraphs.map((para, i) => (
                   <motion.p
                     key={i}
                     initial={{ opacity: 0 }}
@@ -331,6 +347,7 @@ export default function AppPage() {
                   setOutputText('')
                   setProgress({ current: 0, total: 0 })
                   setLoading(false)
+                  setDone(false)
                 }}
                 className="label text-[10px] flex items-center gap-2 tap-target text-gray-600 dark:text-gray-400 hover:!text-red-700 dark:hover:!text-red-400 transition-colors"
               >
@@ -342,6 +359,24 @@ export default function AppPage() {
             </div>
           </div>
         </div>
+
+        {/* Review: readability and meaning check for the finished rewrite */}
+        {done && !loading && (
+          <section aria-labelledby="review-heading" className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="bezel">
+              <div className="bezel-inner p-7">
+                <h2 id="review-heading" className="label text-[11px] mb-5">Readability</h2>
+                <StatsBar originalText={sourceText} rewrittenText={outputText} />
+              </div>
+            </div>
+            <div className="bezel">
+              <div className="bezel-inner p-7">
+                <h2 className="label text-[11px] mb-5">Meaning check</h2>
+                <MeaningCheckPanel originalText={sourceText} rewrittenText={outputText} />
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Progress bar */}
         <AnimatePresence>
