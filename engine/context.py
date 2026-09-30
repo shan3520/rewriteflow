@@ -1,6 +1,7 @@
-"""Pipeline execution context module."""
+"""Pipeline execution context."""
 import time
-from typing import Dict, Any, List, Optional
+from typing import Any, Callable, Dict, List, Optional
+
 
 class StepResult:
     def __init__(self, node_name: str, input_text: str, output_text: str, duration_ms: float, metadata: Optional[Dict[str, Any]] = None):
@@ -10,18 +11,23 @@ class StepResult:
         self.duration_ms = duration_ms
         self.metadata = metadata or {}
 
+
 class PipelineContext:
-    def __init__(self, initial_text: str, variables: Optional[Dict[str, Any]] = None):
+    """Carries the text through the nodes, plus the LLM client and a history of each step."""
+
+    def __init__(self, initial_text: str, variables: Optional[Dict[str, Any]] = None, llm=None,
+                 on_progress: Optional[Callable[[int, int], None]] = None):
         self.text = initial_text
         self.original_text = initial_text
         self.variables = variables or {}
+        self.llm = llm
+        self.on_progress = on_progress
         self.history: List[StepResult] = []
         self.logs: List[str] = []
         self.start_time = time.time()
 
     def update_text(self, new_text: str, node_name: str, duration_ms: float, metadata: Optional[Dict[str, Any]] = None):
-        step = StepResult(node_name, self.text, new_text, duration_ms, metadata)
-        self.history.append(step)
+        self.history.append(StepResult(node_name, self.text, new_text, duration_ms, metadata))
         self.text = new_text
 
     def add_log(self, message: str):

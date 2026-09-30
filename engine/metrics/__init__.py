@@ -1,1 +1,1 @@
-"""Metrics package for readability and similarity evaluation."""
+"""Readability, similarity and rewrite-report metrics."""

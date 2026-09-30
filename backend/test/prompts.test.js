@@ -54,3 +54,13 @@ test('options add length and formality lines', () => {
   const neutral = buildModePrompt(library, 'standard', { length: 'same', formality: 'neutral' })
   assert.equal(neutral, buildModePrompt(library, 'standard'))
 })
+
+test('prompts match shared/fixtures/prompts.json (the Python CLI checks the same file)', async () => {
+  const { default: cases } = await import('../../shared/fixtures/prompts.json', { with: { type: 'json' } })
+  for (const c of cases) {
+    const actual = c.kind === 'mode'
+      ? buildModePrompt(library, c.mode, c.options)
+      : buildWorkflowPrompt(library, c.workflow, c.options)
+    assert.equal(actual, c.expected)
+  }
+})

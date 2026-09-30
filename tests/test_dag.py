@@ -1,23 +1,22 @@
-"""Unit tests for DAGSolver and NodeRegistry."""
+"""Dependency ordering and the node registry."""
 import unittest
+
 from engine.dag import DAGSolver
+from engine.nodes.cleanup import TextCleanupNode
 from engine.registry import NodeRegistry
-from engine.nodes.grammar import GrammarFixNode
+
 
 class TestDAGAndRegistry(unittest.TestCase):
     def test_dag_solver(self):
-        deps = {
-            "nodeB": ["nodeA"],
-            "nodeC": ["nodeB"]
-        }
-        solver = DAGSolver(deps)
-        order = solver.get_execution_order()
+        order = DAGSolver({"nodeB": ["nodeA"], "nodeC": ["nodeB"]}).get_execution_order()
         self.assertEqual(order, ["nodeA", "nodeB", "nodeC"])
 
-    def test_node_registry(self):
-        NodeRegistry.register("grammar", GrammarFixNode)
-        node = NodeRegistry.create("grammar")
-        self.assertEqual(node.name, "GrammarFixNode")
+    def test_builtin_nodes_are_registered(self):
+        self.assertIn("tidy_markdown", NodeRegistry.list_nodes())
+        self.assertIsInstance(NodeRegistry.create("tidy_whitespace"), TextCleanupNode)
+        with self.assertRaisesRegex(ValueError, "Available"):
+            NodeRegistry.create("nope")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,33 +1,36 @@
-"""Unit tests for prompt templates and few-shot formatting."""
+"""Prompt building must match the backend exactly (shared/fixtures/prompts.json)."""
 import unittest
-from engine.prompts.template import PromptTemplate
-from engine.prompts.few_shot import FewShotPromptManager
+
+from engine.prompts.builder import build_mode_prompt, build_workflow_prompt
+from engine.prompts.template import PromptTemplate, fill_params
+from tests.helpers import fixture
+
 
 class TestPrompts(unittest.TestCase):
-    def test_template_render(self):
-        tmpl = PromptTemplate("Hello {{ name }}, tone is {{ tone }}.")
-        rendered = tmpl.render({"name": "User", "tone": "formal"})
-        self.assertEqual(rendered, "Hello User, tone is formal.")
+    def test_matches_backend(self):
+        for case in fixture("prompts.json"):
+            with self.subTest(case.get("mode") or case["workflow"]):
+                if case["kind"] == "mode":
+                    actual = build_mode_prompt(case["mode"], case["options"])
+                else:
+                    actual = build_workflow_prompt(case["workflow"], case["options"])
+                self.assertEqual(actual, case["expected"])
 
-    def test_few_shot_manager(self):
-        mgr = FewShotPromptManager()
-        mgr.add_example("can't", "cannot")
-        formatted = mgr.format_examples()
-        self.assertIn("Input: can't", formatted)
+    def test_unknown_mode_and_step(self):
+        with self.assertRaises(ValueError):
+            build_mode_prompt("nope")
+        with self.assertRaises(ValueError):
+            build_workflow_prompt({"steps": [{"id": "nope"}]})
+
+    def test_fill_params(self):
+        defs = {"lang": {"default": "Spanish"}}
+        self.assertEqual(fill_params("into {lang}", defs, {"lang": " German "}), "into German")
+        self.assertEqual(fill_params("into {lang}", defs), "into Spanish")
+        self.assertEqual(fill_params("x {missing}", {}), "x ")
+
+    def test_prompt_template(self):
+        self.assertEqual(PromptTemplate("Hi {{ name }}, {{other}}").render({"name": "Ana"}), "Hi Ana, {{other}}")
+
 
 if __name__ == "__main__":
     unittest.main()
-
-from engine.prompts.chain_of_thought import CoTReasoningBuilder
-from engine.prompts.versioning import PromptVersionManager
-
-class TestCoTAndVersioning(unittest.TestCase):
-    def test_cot_builder(self):
-        cot = CoTReasoningBuilder()
-        prompt = cot.build_prompt("Sample text")
-        self.assertIn("Think step by step:", prompt)
-
-    def test_version_manager(self):
-        mgr = PromptVersionManager()
-        mgr.register_version("tone", "v1.0", "Draft template {{ text }}")
-        self.assertEqual(mgr.get_template("tone", "v1.0"), "Draft template {{ text }}")
